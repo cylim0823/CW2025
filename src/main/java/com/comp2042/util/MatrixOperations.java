@@ -1,4 +1,6 @@
-package com.comp2042;
+package com.comp2042.util;
+
+import com.comp2042.model.ClearRow;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
