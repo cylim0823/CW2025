@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
+<?import javafx.scene.text.Font?>
 <Pane fx:controller="com.comp2042.ui.GuiController"
       xmlns:fx="http://javafx.com/fxml">
     <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
@@ -14,6 +15,12 @@
             <GridPane fx:id="gamePanel" hgap="1" vgap="1" layoutY="30" layoutX="40"/>
         </center>
     </BorderPane>
+
+    <Label fx:id="scoreLabel" layoutX="20.0" layoutY="14.0" text="Score: 0" textFill="white">
+        <font>
+            <Font name="System Bold" size="18.0" />
+        </font>
+    </Label>
 
     <Group fx:id="groupNotification" layoutX="14" layoutY="203">
         <VBox alignment="CENTER">
