@@ -90,7 +90,7 @@ public class SimpleBoard implements Board {
     public boolean createNewBrick() {
         Brick currentBrick = brickGenerator.getBrick();
         brickRotator.setBrick(currentBrick);
-        currentOffset = new Point(4, 10);
+        currentOffset = new Point(4, 0);
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
     }
 
@@ -128,5 +128,15 @@ public class SimpleBoard implements Board {
         currentGameMatrix = new int[width][height];
         score.reset();
         createNewBrick();
+    }
+
+    @Override
+    public void hardDrop(){
+        int rowsDropped = 0;
+        while (moveBrickDown()){
+            rowsDropped++;
+        }
+
+        score.add(rowsDropped * 2); // Add 2 points for every row the brick was dropped
     }
 }

@@ -82,6 +82,13 @@ public class GuiController implements Initializable {
                         moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
                         keyEvent.consume();
                     }
+                    if (keyEvent.getCode() == KeyCode.SPACE) {
+                        // This event instantly moves the brick to the bottom
+                        refreshBrick(eventListener.onHardDropEvent(new MoveEvent(null, EventSource.USER)));
+                        // This call locks the piece and checks for cleared lines
+                        moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
+                        keyEvent.consume();
+                    }
                 }
                 if (keyEvent.getCode() == KeyCode.N) {
                     newGame(null);

@@ -64,5 +64,12 @@ public class GameController implements InputEventListener {
     public void createNewGame() {
         board.newGame();
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
+
+    }
+
+    @Override
+    public ViewData onHardDropEvent(MoveEvent event){
+        board.hardDrop();
+        return board.getViewData();
     }
 }
