@@ -50,6 +50,7 @@ public class GuiController implements Initializable {
     private InputEventListener eventListener;
 
     private Rectangle[][] rectangles;
+    private Rectangle[][] ghostRectangles; // FIXED: Removed duplicate 'rectangles' declaration
 
     private Timeline timeLine;
 
@@ -83,9 +84,7 @@ public class GuiController implements Initializable {
                         keyEvent.consume();
                     }
                     if (keyEvent.getCode() == KeyCode.SPACE) {
-                        // This event instantly moves the brick to the bottom
                         refreshBrick(eventListener.onHardDropEvent(new MoveEvent(null, EventSource.USER)));
-                        // This call locks the piece and checks for cleared lines
                         moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
                         keyEvent.consume();
                     }
@@ -105,12 +104,18 @@ public class GuiController implements Initializable {
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
+        ghostRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length]; // FIXED: Initialized the ghostRectangles array
         for (int i = 2; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 rectangle.setFill(Color.TRANSPARENT);
                 displayMatrix[i][j] = rectangle;
                 gamePanel.add(rectangle, j, i - 2);
+
+                Rectangle ghostRectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                ghostRectangle.setFill(Color.TRANSPARENT);
+                ghostRectangles[i][j] = ghostRectangle;
+                gamePanel.add(ghostRectangle, j, i - 2);
             }
         }
 
@@ -169,6 +174,14 @@ public class GuiController implements Initializable {
         return returnPaint;
     }
 
+    private Paint getGhostFillColor(int i) {
+        Paint returnPaint = getFillColor(i);
+        if (returnPaint instanceof Color) {
+            Color color = (Color) returnPaint;
+            return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.3); // Return a semi-transparent version
+        }
+        return returnPaint;
+    }
 
     private void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
@@ -177,6 +190,26 @@ public class GuiController implements Initializable {
             for (int i = 0; i < brick.getBrickData().length; i++) {
                 for (int j = 0; j < brick.getBrickData()[i].length; j++) {
                     setRectangleData(brick.getBrickData()[i][j], rectangles[i][j]);
+                }
+            }
+            // 1. Clear the old ghost piece
+            for (int i = 2; i < ghostRectangles.length; i++) {
+                for (int j = 0; j < ghostRectangles[i].length; j++) {
+                    ghostRectangles[i][j].setFill(Color.TRANSPARENT);
+                }
+            }
+
+            // 2. Draw the new ghost piece
+            int[][] brickData = brick.getBrickData();
+            for (int i = 0; i < brickData.length; i++) {
+                for (int j = 0; j < brickData[i].length; j++) {
+                    if (brickData[i][j] != 0) {
+                        int x = brick.getxPosition() + j;
+                        int y = brick.getGhostYPosition() + i;
+                        if (y >= 2) {
+                            ghostRectangles[y][x].setFill(getGhostFillColor(brickData[i][j]));
+                        }
+                    }
                 }
             }
         }
@@ -213,6 +246,7 @@ public class GuiController implements Initializable {
         this.eventListener = eventListener;
     }
 
+    @SuppressWarnings("SetTextI18n")
     public void bindScore(IntegerProperty integerProperty) {
         scoreLabel.textProperty().bind(integerProperty.asString("Score: %d"));
     }

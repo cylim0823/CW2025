@@ -9,7 +9,7 @@ import com.comp2042.model.Score;
 import com.comp2042.model.ViewData;
 import com.comp2042.util.MatrixOperations;
 
-import java.awt.*;
+import java.awt.Point;
 
 public class SimpleBoard implements Board {
 
@@ -32,10 +32,9 @@ public class SimpleBoard implements Board {
 
     @Override
     public boolean moveBrickDown() {
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         Point p = new Point(currentOffset);
         p.translate(0, 1);
-        boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
+        boolean conflict = MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
         if (conflict) {
             return false;
         } else {
@@ -47,10 +46,9 @@ public class SimpleBoard implements Board {
 
     @Override
     public boolean moveBrickLeft() {
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         Point p = new Point(currentOffset);
         p.translate(-1, 0);
-        boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
+        boolean conflict = MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
         if (conflict) {
             return false;
         } else {
@@ -61,10 +59,9 @@ public class SimpleBoard implements Board {
 
     @Override
     public boolean moveBrickRight() {
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         Point p = new Point(currentOffset);
         p.translate(1, 0);
-        boolean conflict = MatrixOperations.intersect(currentMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
+        boolean conflict = MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) p.getX(), (int) p.getY());
         if (conflict) {
             return false;
         } else {
@@ -75,9 +72,8 @@ public class SimpleBoard implements Board {
 
     @Override
     public boolean rotateLeftBrick() {
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         NextShapeInfo nextShape = brickRotator.getNextShape();
-        boolean conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
+        boolean conflict = MatrixOperations.intersect(currentGameMatrix, nextShape.getShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
         if (conflict) {
             return false;
         } else {
@@ -99,10 +95,6 @@ public class SimpleBoard implements Board {
         return currentGameMatrix;
     }
 
-    @Override
-    public ViewData getViewData() {
-        return new ViewData(brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY(), brickGenerator.getNextBrick().getShapeMatrix().get(0));
-    }
 
     @Override
     public void mergeBrickToBackground() {
@@ -131,12 +123,32 @@ public class SimpleBoard implements Board {
     }
 
     @Override
-    public void hardDrop(){
+    public void hardDrop() {
         int rowsDropped = 0;
-        while (moveBrickDown()){
+        while (moveBrickDown()) {
             rowsDropped++;
         }
 
         score.add(rowsDropped * 2); // Add 2 points for every row the brick was dropped
+    }
+
+    private int getDropPosition() {
+        int y = (int) currentOffset.getY();
+        while (!MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), y + 1)) {
+            y++;
+        }
+        return y;
+    }
+
+    @Override
+    public ViewData getViewData() {
+        int ghostY = getDropPosition();
+        return new ViewData(
+                brickRotator.getCurrentShape(),
+                (int) currentOffset.getX(),
+                (int) currentOffset.getY(),
+                brickGenerator.getNextBrick().getShapeMatrix().get(0),
+                ghostY
+        );
     }
 }
