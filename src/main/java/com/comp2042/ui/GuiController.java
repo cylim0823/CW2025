@@ -4,6 +4,7 @@ import com.comp2042.logic.InputEventListener;
 import com.comp2042.model.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -50,7 +51,7 @@ public class GuiController implements Initializable {
     private InputEventListener eventListener;
 
     private Rectangle[][] rectangles;
-    private Rectangle[][] ghostRectangles; // FIXED: Removed duplicate 'rectangles' declaration
+    private Rectangle[][] ghostRectangles;
 
     private Timeline timeLine;
 
@@ -96,6 +97,9 @@ public class GuiController implements Initializable {
         });
         gameOverPanel.setVisible(false);
 
+        gameOverPanel.setOnPlayAgain(this::newGame);
+        gameOverPanel.setOnExit(e -> exitGame());
+
         final Reflection reflection = new Reflection();
         reflection.setFraction(0.8);
         reflection.setTopOpacity(0.9);
@@ -104,7 +108,7 @@ public class GuiController implements Initializable {
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
-        ghostRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length]; // FIXED: Initialized the ghostRectangles array
+        ghostRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length];
         for (int i = 2; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
@@ -265,6 +269,11 @@ public class GuiController implements Initializable {
         timeLine.play();
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
+    }
+
+    private void exitGame() {
+        Platform.exit();
+        System.exit(0);
     }
 
     public void pauseGame(ActionEvent actionEvent) {
