@@ -44,6 +44,9 @@ public class GuiController implements Initializable {
     private GameOverPanel gameOverPanel;
 
     @FXML
+    private GridPane nextBrickPanel;
+
+    @FXML
     private Label scoreLabel;
 
     private Rectangle[][] displayMatrix;
@@ -52,6 +55,7 @@ public class GuiController implements Initializable {
 
     private Rectangle[][] rectangles;
     private Rectangle[][] ghostRectangles;
+    private Rectangle[][] nextBrickRectangles;
 
     private Timeline timeLine;
 
@@ -132,6 +136,17 @@ public class GuiController implements Initializable {
                 brickPanel.add(rectangle, j, i);
             }
         }
+
+        nextBrickRectangles = new Rectangle[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                rectangle.setFill(Color.TRANSPARENT);
+                nextBrickRectangles[i][j] = rectangle;
+                nextBrickPanel.add(rectangle, j, i);
+            }
+        }
+
         brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
         brickPanel.setLayoutY(-42 + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
 
@@ -216,6 +231,8 @@ public class GuiController implements Initializable {
                     }
                 }
             }
+
+            refreshNextBrickPreview(brick);
         }
     }
 
@@ -231,6 +248,16 @@ public class GuiController implements Initializable {
         rectangle.setFill(getFillColor(color));
         rectangle.setArcHeight(9);
         rectangle.setArcWidth(9);
+    }
+
+    private void refreshNextBrickPreview(ViewData brick) {
+        if (brick.getNextBrickData() != null) {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    nextBrickRectangles[i][j].setFill(getFillColor(brick.getNextBrickData()[i][j]));
+                }
+            }
+        }
     }
 
     private void moveDown(MoveEvent event) {
