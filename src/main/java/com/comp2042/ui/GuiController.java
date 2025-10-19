@@ -63,14 +63,27 @@ public class GuiController implements Initializable {
 
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
 
+    private Label pauseLabel;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), 38);
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
+
+        pauseLabel = new Label("PAUSED");
+        pauseLabel.getStyleClass().add("gameOverStyle");
+        pauseLabel.setVisible(false);
+        groupNotification.getChildren().add(pauseLabel);
+
         gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
+                if (keyEvent.getCode() == KeyCode.P) {
+                    togglePause();
+                    keyEvent.consume();
+                }
+
                 if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
                     if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
                         refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
@@ -305,5 +318,19 @@ public class GuiController implements Initializable {
 
     public void pauseGame(ActionEvent actionEvent) {
         gamePanel.requestFocus();
+    }
+
+    private void togglePause() {
+        if (isGameOver.get()) {
+            return;
+        }
+        isPause.set(!isPause.get());
+        if (isPause.get()) {
+            timeLine.pause();
+            pauseLabel.setVisible(true);
+        } else {
+            timeLine.play();
+            pauseLabel.setVisible(false);
+        }
     }
 }
