@@ -18,6 +18,7 @@ import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
@@ -49,6 +50,9 @@ public class GuiController implements Initializable {
     @FXML
     private Label scoreLabel;
 
+    @FXML
+    private Label levelLabel;
+
     private Rectangle[][] displayMatrix;
 
     private InputEventListener eventListener;
@@ -74,7 +78,8 @@ public class GuiController implements Initializable {
         pauseLabel = new Label("PAUSED");
         pauseLabel.getStyleClass().add("gameOverStyle");
         pauseLabel.setVisible(false);
-        groupNotification.getChildren().add(pauseLabel);
+        VBox notificationVBox = (VBox) groupNotification.getChildren().get(0);
+        notificationVBox.getChildren().add(pauseLabel);
 
         gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
@@ -210,7 +215,7 @@ public class GuiController implements Initializable {
         Paint returnPaint = getFillColor(i);
         if (returnPaint instanceof Color) {
             Color color = (Color) returnPaint;
-            return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.3); // Return a semi-transparent version
+            return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.3);
         }
         return returnPaint;
     }
@@ -224,14 +229,12 @@ public class GuiController implements Initializable {
                     setRectangleData(brick.getBrickData()[i][j], rectangles[i][j]);
                 }
             }
-            // 1. Clear the old ghost piece
             for (int i = 2; i < ghostRectangles.length; i++) {
                 for (int j = 0; j < ghostRectangles[i].length; j++) {
                     ghostRectangles[i][j].setFill(Color.TRANSPARENT);
                 }
             }
 
-            // 2. Draw the new ghost piece
             int[][] brickData = brick.getBrickData();
             for (int i = 0; i < brickData.length; i++) {
                 for (int j = 0; j < brickData[i].length; j++) {
@@ -295,6 +298,11 @@ public class GuiController implements Initializable {
         scoreLabel.textProperty().bind(integerProperty.asString("Score: %d"));
     }
 
+    @SuppressWarnings("SetTextI18n")
+    public void bindLevel(IntegerProperty integerProperty) {
+        levelLabel.textProperty().bind(integerProperty.asString("Level: %d"));
+    }
+
     public void gameOver() {
         timeLine.stop();
         gameOverPanel.setVisible(true);
@@ -306,7 +314,7 @@ public class GuiController implements Initializable {
         gameOverPanel.setVisible(false);
         eventListener.createNewGame();
         gamePanel.requestFocus();
-        timeLine.play();
+        updateLevel(1);
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
     }
@@ -332,5 +340,29 @@ public class GuiController implements Initializable {
             timeLine.play();
             pauseLabel.setVisible(false);
         }
+    }
+
+    public void updateLevel(int level) {
+        long newSpeed;
+        switch (level) {
+            case 1: newSpeed = 400; break;
+            case 2: newSpeed = 360; break;
+            case 3: newSpeed = 320; break;
+            case 4: newSpeed = 280; break;
+            case 5: newSpeed = 240; break;
+            case 6: newSpeed = 200; break;
+            case 7: newSpeed = 160; break;
+            case 8: newSpeed = 120; break;
+            case 9: newSpeed = 100; break;
+            default: newSpeed = 80; break;
+        }
+
+        timeLine.stop();
+        timeLine = new Timeline(new KeyFrame(
+                Duration.millis(newSpeed),
+                ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
+        ));
+        timeLine.setCycleCount(Timeline.INDEFINITE);
+        timeLine.play();
     }
 }

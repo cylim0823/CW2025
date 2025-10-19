@@ -14,12 +14,6 @@
         </center>
     </BorderPane>
 
-    <Label fx:id="scoreLabel" layoutX="20.0" layoutY="14.0" text="Score: 0" textFill="white">
-        <font>
-            <Font name="System Bold" size="18.0" />
-        </font>
-    </Label>
-
     <Group fx:id="groupNotification" layoutX="14" layoutY="203">
         <VBox alignment="CENTER">
             <GameOverPanel fx:id="gameOverPanel"/>
@@ -37,6 +31,22 @@
             </GridPane>
         </children>
     </VBox>
+
+    <VBox alignment="CENTER_LEFT" layoutX="255.0" layoutY="300.0" spacing="10">
+        <children>
+            <Label fx:id="scoreLabel" text="Score: 0" textFill="white">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
+            <Label fx:id="levelLabel" text="Level: 1" textFill="white">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
+        </children>
+    </VBox>
+
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>
