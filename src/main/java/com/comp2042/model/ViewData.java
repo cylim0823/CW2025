@@ -9,14 +9,15 @@ public final class ViewData {
     private final int yPosition;
     private final int[][] nextBrickData;
     private final int ghostYPosition;
+    private final int[][] holdBrickData;
 
-    // The constructor now correctly accepts 5 arguments
-    public ViewData(int[][] brickData, int xPosition, int yPosition, int[][] nextBrickData, int ghostYPosition) {
+    public ViewData(int[][] brickData, int xPosition, int yPosition, int[][] nextBrickData, int ghostYPosition, int[][] holdBrickData) {
         this.brickData = brickData;
         this.xPosition = xPosition;
         this.yPosition = yPosition;
         this.nextBrickData = nextBrickData;
         this.ghostYPosition = ghostYPosition;
+        this.holdBrickData = holdBrickData;
     }
 
     public int[][] getBrickData() {
@@ -35,8 +36,11 @@ public final class ViewData {
         return MatrixOperations.copy(nextBrickData);
     }
 
-    // The new getter method for the ghost position
     public int getGhostYPosition() {
         return ghostYPosition;
+    }
+
+    public int[][] getHoldBrickData() {
+        return MatrixOperations.copy(holdBrickData);
     }
 }

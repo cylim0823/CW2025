@@ -20,6 +20,8 @@ public class SimpleBoard implements Board {
     private int[][] currentGameMatrix;
     private Point currentOffset;
     private final Score score;
+    private Brick heldBrick;
+    private boolean canHold;
 
     public SimpleBoard(int width, int height) {
         this.width = width;
@@ -28,6 +30,60 @@ public class SimpleBoard implements Board {
         brickGenerator = new RandomBrickGenerator();
         brickRotator = new BrickRotator();
         score = new Score();
+        this.heldBrick = null;
+        this.canHold = true;
+    }
+
+    public void holdCurrentBrick() {
+        if (!canHold) {
+            return;
+        }
+
+        if (heldBrick == null) {
+            heldBrick = brickRotator.getBrick();
+            createNewBrick();
+        } else {
+            Brick currentBrick = brickRotator.getBrick();
+            brickRotator.setBrick(heldBrick);
+            heldBrick = currentBrick;
+            currentOffset = new Point(4, 0);
+            if (MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY())) {
+                newGame();
+            }
+        }
+        canHold = false;
+    }
+
+    @Override
+    public boolean createNewBrick() {
+        this.canHold = true;
+        Brick currentBrick = brickGenerator.getBrick();
+        brickRotator.setBrick(currentBrick);
+        currentOffset = new Point(4, 0);
+        return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
+    }
+
+    @Override
+    public void newGame() {
+        currentGameMatrix = new int[width][height];
+        score.reset();
+        heldBrick = null;
+        canHold = true;
+        createNewBrick();
+    }
+
+    @Override
+    public ViewData getViewData() {
+        int ghostY = getDropPosition();
+        int[][] holdData = heldBrick != null ? heldBrick.getShapeMatrix().get(0) : new int[4][4];
+        return new ViewData(
+                brickRotator.getCurrentShape(),
+                (int) currentOffset.getX(),
+                (int) currentOffset.getY(),
+                brickGenerator.getNextBrick().getShapeMatrix().get(0),
+                ghostY,
+                holdData
+        );
     }
 
     @Override
@@ -83,18 +139,9 @@ public class SimpleBoard implements Board {
     }
 
     @Override
-    public boolean createNewBrick() {
-        Brick currentBrick = brickGenerator.getBrick();
-        brickRotator.setBrick(currentBrick);
-        currentOffset = new Point(4, 0);
-        return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
-    }
-
-    @Override
     public int[][] getBoardMatrix() {
         return currentGameMatrix;
     }
-
 
     @Override
     public void mergeBrickToBackground() {
@@ -106,20 +153,11 @@ public class SimpleBoard implements Board {
         ClearRow clearRow = MatrixOperations.checkRemoving(currentGameMatrix);
         currentGameMatrix = clearRow.getNewMatrix();
         return clearRow;
-
     }
 
     @Override
     public Score getScore() {
         return score;
-    }
-
-
-    @Override
-    public void newGame() {
-        currentGameMatrix = new int[width][height];
-        score.reset();
-        createNewBrick();
     }
 
     @Override
@@ -128,8 +166,7 @@ public class SimpleBoard implements Board {
         while (moveBrickDown()) {
             rowsDropped++;
         }
-
-        score.add(rowsDropped * 2); // Add 2 points for every row the brick was dropped
+        score.add(rowsDropped * 2);
     }
 
     private int getDropPosition() {
@@ -138,17 +175,5 @@ public class SimpleBoard implements Board {
             y++;
         }
         return y;
-    }
-
-    @Override
-    public ViewData getViewData() {
-        int ghostY = getDropPosition();
-        return new ViewData(
-                brickRotator.getCurrentShape(),
-                (int) currentOffset.getX(),
-                (int) currentOffset.getY(),
-                brickGenerator.getNextBrick().getShapeMatrix().get(0),
-                ghostY
-        );
     }
 }

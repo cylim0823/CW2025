@@ -1,10 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <?import com.comp2042.ui.GameOverPanel?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 <?import javafx.scene.text.Font?>
-<?import javafx.geometry.Insets?>
+
 <Pane fx:controller="com.comp2042.ui.GuiController"
       xmlns:fx="http://javafx.com/fxml">
     <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
@@ -14,13 +16,13 @@
         </center>
     </BorderPane>
 
-    <Group fx:id="groupNotification" layoutX="14" layoutY="203">
+    <Group fx:id="groupNotification" layoutX="14" layoutY="180">
         <VBox alignment="CENTER">
             <GameOverPanel fx:id="gameOverPanel"/>
         </VBox>
     </Group>
 
-    <VBox alignment="CENTER" layoutX="255.0" layoutY="60.0" spacing="10">
+    <VBox alignment="CENTER" layoutX="255.0" layoutY="60.0" spacing="5">
         <children>
             <Label text="NEXT" textFill="white">
                 <font>
@@ -31,8 +33,18 @@
             </GridPane>
         </children>
     </VBox>
-
-    <VBox alignment="CENTER_LEFT" layoutX="255.0" layoutY="300.0" spacing="10">
+    <VBox alignment="CENTER" layoutX="255.0" layoutY="220.0" spacing="5">
+        <children>
+            <Label text="HOLD" textFill="white">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
+            <GridPane fx:id="holdBrickPanel" hgap="1" vgap="1" styleClass="gameBoard" style="-fx-padding: 5">
+            </GridPane>
+        </children>
+    </VBox>
+    <VBox alignment="CENTER_LEFT" layoutX="255.0" layoutY="400.0" spacing="10">
         <children>
             <Label fx:id="scoreLabel" text="Score: 0" textFill="white">
                 <font>
@@ -46,7 +58,6 @@
             </Label>
         </children>
     </VBox>
-
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>

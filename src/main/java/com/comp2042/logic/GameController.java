@@ -70,7 +70,6 @@ public class GameController implements InputEventListener {
         return board.getViewData();
     }
 
-
     @Override
     public void createNewGame() {
         board.newGame();
@@ -82,6 +81,12 @@ public class GameController implements InputEventListener {
     @Override
     public ViewData onHardDropEvent(MoveEvent event){
         board.hardDrop();
+        return board.getViewData();
+    }
+
+    @Override
+    public ViewData onHoldEvent(MoveEvent event) {
+        board.holdCurrentBrick();
         return board.getViewData();
     }
 }
