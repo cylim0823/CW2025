@@ -34,24 +34,29 @@ public class SimpleBoard implements Board {
         this.canHold = true;
     }
 
-    public void holdCurrentBrick() {
+    @Override
+    public boolean holdCurrentBrick() {
         if (!canHold) {
-            return;
+            return false;
         }
-
+        boolean isGameOver = false; // Variable to track game-over state
         if (heldBrick == null) {
             heldBrick = brickRotator.getBrick();
-            createNewBrick();
+            isGameOver = createNewBrick();
         } else {
             Brick currentBrick = brickRotator.getBrick();
             brickRotator.setBrick(heldBrick);
             heldBrick = currentBrick;
             currentOffset = new Point(4, 0);
+
+            // Instead of calling newGame(), set the game-over flag.
             if (MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY())) {
-                newGame();
+                isGameOver = true;
             }
         }
+
         canHold = false;
+        return isGameOver; // Return the final game-over state to the GameController
     }
 
     @Override
