@@ -5,8 +5,6 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<?import javafx.scene.text.Font?>
-
 <Pane fx:controller="com.comp2042.ui.GuiController"
       xmlns:fx="http://javafx.com/fxml">
     <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
@@ -24,40 +22,27 @@
 
     <VBox alignment="CENTER" layoutX="255.0" layoutY="60.0" spacing="5">
         <children>
-            <Label text="NEXT" textFill="white">
-                <font>
-                    <Font name="System Bold" size="18.0" />
-                </font>
-            </Label>
+            <Label text="NEXT" styleClass="scoreClass" />
             <GridPane fx:id="nextBrickPanel" hgap="1" vgap="1" styleClass="gameBoard" style="-fx-padding: 5">
             </GridPane>
         </children>
     </VBox>
+
     <VBox alignment="CENTER" layoutX="255.0" layoutY="220.0" spacing="5">
         <children>
-            <Label text="HOLD" textFill="white">
-                <font>
-                    <Font name="System Bold" size="18.0" />
-                </font>
-            </Label>
+            <Label text="HOLD" styleClass="scoreClass" />
             <GridPane fx:id="holdBrickPanel" hgap="1" vgap="1" styleClass="gameBoard" style="-fx-padding: 5">
             </GridPane>
         </children>
     </VBox>
+
     <VBox alignment="CENTER_LEFT" layoutX="255.0" layoutY="400.0" spacing="10">
         <children>
-            <Label fx:id="scoreLabel" text="Score: 0" textFill="white">
-                <font>
-                    <Font name="System Bold" size="18.0" />
-                </font>
-            </Label>
-            <Label fx:id="levelLabel" text="Level: 1" textFill="white">
-                <font>
-                    <Font name="System Bold" size="18.0" />
-                </font>
-            </Label>
+            <Label fx:id="scoreLabel" text="Score: 0" styleClass="scoreClass" />
+            <Label fx:id="levelLabel" text="Level: 1" styleClass="scoreClass" />
         </children>
     </VBox>
+
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>

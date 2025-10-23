@@ -34,7 +34,7 @@ public class MainMenuController {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
         // Create the new game scene
-        Scene scene = new Scene(root, 380, 510);
+        Scene scene = new Scene(root, 450, 510);
 
         // Set the window to show the new game scene
         stage.setScene(scene);

@@ -11,8 +11,11 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
@@ -23,8 +26,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -63,7 +68,8 @@ public class GuiController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), 38);
+        Font.loadFont(getClass().getResourceAsStream("/digital.ttf"), 38);
+
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
 
@@ -115,7 +121,18 @@ public class GuiController implements Initializable {
         });
         gameOverPanel.setVisible(false);
         gameOverPanel.setOnPlayAgain(this::newGame);
-        gameOverPanel.setOnExit(e -> exitGame());
+        gameOverPanel.setOnMainMenu(e -> {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mainMenu.fxml"));
+                Parent mainMenuRoot = fxmlLoader.load();
+                Stage stage = (Stage) gameOverPanel.getScene().getWindow();
+                Scene scene = new Scene(mainMenuRoot, 450, 510);
+                stage.setScene(scene);
+
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
         final Reflection reflection = new Reflection();
         reflection.setFraction(0.8);
         reflection.setTopOpacity(0.9);

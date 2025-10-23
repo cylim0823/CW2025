@@ -13,7 +13,7 @@ import javafx.scene.layout.VBox;
 public class GameOverPanel extends BorderPane {
 
     private final Button playAgainButton;
-    private final Button exitButton;
+    private final Button mainMenuButton;
 
     public GameOverPanel() {
         final Label gameOverLabel = new Label("GAME OVER");
@@ -22,11 +22,11 @@ public class GameOverPanel extends BorderPane {
         playAgainButton = new Button("Play Again");
         playAgainButton.getStyleClass().add("playAgainButton");
 
-        exitButton = new Button("Exit");
-        exitButton.getStyleClass().add("exitButton");
+        mainMenuButton = new Button("Main Menu");
+        mainMenuButton.getStyleClass().add("mainMenuButton");
 
         // Use an HBox for side-by-side buttons
-        HBox buttonBox = new HBox(20, playAgainButton, exitButton);
+        HBox buttonBox = new HBox(20, playAgainButton, mainMenuButton);
         buttonBox.setAlignment(Pos.CENTER);
 
         // Use a VBox to stack the label and the button box
@@ -41,7 +41,7 @@ public class GameOverPanel extends BorderPane {
         playAgainButton.setOnAction(handler);
     }
 
-    public void setOnExit(EventHandler<ActionEvent> handler) {
-        exitButton.setOnAction(handler);
+    public void setOnMainMenu(EventHandler<ActionEvent> handler) {
+        mainMenuButton.setOnAction(handler);
     }
 }
