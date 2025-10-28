@@ -3,11 +3,13 @@ package com.comp2042.ui;
 import com.comp2042.logic.InputEventListener;
 import com.comp2042.model.*;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -53,6 +55,8 @@ public class GuiController implements Initializable {
     private Label scoreLabel;
     @FXML
     private Label levelLabel;
+    @FXML
+    private Label countdownLabel;
 
     private Rectangle[][] displayMatrix;
     private InputEventListener eventListener;
@@ -65,6 +69,7 @@ public class GuiController implements Initializable {
     private final BooleanProperty isPause = new SimpleBooleanProperty();
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
     private Label pauseLabel;
+    private final BooleanProperty isCountingDown = new SimpleBooleanProperty(false);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -85,6 +90,11 @@ public class GuiController implements Initializable {
                 if (keyEvent.getCode() == KeyCode.P) {
                     togglePause();
                     keyEvent.consume();
+                }
+
+                if (isCountingDown.get()) {
+                    keyEvent.consume();
+                    return;
                 }
 
                 if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
@@ -128,7 +138,6 @@ public class GuiController implements Initializable {
                 Stage stage = (Stage) gameOverPanel.getScene().getWindow();
                 Scene scene = new Scene(mainMenuRoot, 450, 510);
                 stage.setScene(scene);
-
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
@@ -188,7 +197,6 @@ public class GuiController implements Initializable {
                 ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
         ));
         timeLine.setCycleCount(Timeline.INDEFINITE);
-        timeLine.play();
     }
 
     private void refreshBrick(ViewData brick) {
@@ -237,6 +245,12 @@ public class GuiController implements Initializable {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     holdBrickRectangles[i][j].setFill(getFillColor(brick.getHoldBrickData()[i][j]));
+                }
+            }
+        } else {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    holdBrickRectangles[i][j].setFill(Color.TRANSPARENT);
                 }
             }
         }
@@ -316,12 +330,10 @@ public class GuiController implements Initializable {
         this.eventListener = eventListener;
     }
 
-    @SuppressWarnings("SetTextI18n")
     public void bindScore(IntegerProperty integerProperty) {
         scoreLabel.textProperty().bind(integerProperty.asString("Score: %d"));
     }
 
-    @SuppressWarnings("SetTextI18n")
     public void bindLevel(IntegerProperty integerProperty) {
         levelLabel.textProperty().bind(integerProperty.asString("Level: %d"));
     }
@@ -341,6 +353,7 @@ public class GuiController implements Initializable {
         updateLevel(1);
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
+        showCountdown();
     }
 
     private void exitGame() {
@@ -388,5 +401,39 @@ public class GuiController implements Initializable {
         ));
         timeLine.setCycleCount(Timeline.INDEFINITE);
         timeLine.play();
+    }
+
+    public void startGame() {
+        isCountingDown.set(false);
+        if (timeLine != null) {
+            timeLine.play();
+            gamePanel.requestFocus();
+        }
+    }
+
+    public void showCountdown() {
+        isCountingDown.set(true);
+        if (timeLine != null) {
+            timeLine.pause();
+        }
+        IntegerProperty countdown = new SimpleIntegerProperty(3);
+        countdownLabel.textProperty().bind(countdown.asString());
+        countdownLabel.setVisible(true);
+        countdownLabel.toFront();
+        Timeline countdownTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(1), e -> countdown.set(countdown.get() - 1))
+        );
+        countdownTimeline.setCycleCount(3);
+        countdownTimeline.setOnFinished(e -> {
+            countdownLabel.textProperty().unbind();
+            countdownLabel.setText("GO!");
+            PauseTransition goPause = new PauseTransition(Duration.seconds(1));
+            goPause.setOnFinished(event -> {
+                countdownLabel.setVisible(false);
+                startGame();
+            });
+            goPause.play();
+        });
+        countdownTimeline.play();
     }
 }

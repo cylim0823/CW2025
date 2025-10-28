@@ -17,6 +17,7 @@ public class GameController implements InputEventListener {
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
+        viewGuiController.showCountdown();
         viewGuiController.bindScore(board.getScore().scoreProperty());
         viewGuiController.bindLevel(this.levelProperty());
     }
