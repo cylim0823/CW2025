@@ -309,8 +309,8 @@ public class GuiController implements Initializable {
 
     private void setRectangleData(int color, Rectangle rectangle) {
         rectangle.setFill(getFillColor(color));
-        rectangle.setArcHeight(9);
-        rectangle.setArcWidth(9);
+        rectangle.setArcHeight(0);
+        rectangle.setArcWidth(0);
     }
 
     private void moveDown(MoveEvent event) {
