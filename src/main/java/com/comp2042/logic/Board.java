@@ -28,6 +28,7 @@ public interface Board {
 
     void newGame();
 
-    void hardDrop();
+    int hardDrop();
+
     boolean holdCurrentBrick();
 }

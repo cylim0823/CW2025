@@ -9,48 +9,41 @@ public class GameController implements InputEventListener {
 
     private Board board = new SimpleBoard(25, 10);
     private final GuiController viewGuiController;
-    private int totalLinesCleared = 0;
-    private final IntegerProperty currentLevel = new SimpleIntegerProperty(1);
+    private final ScoreManager scoreManager;
 
     public GameController(GuiController c) {
         viewGuiController = c;
+        scoreManager = new ScoreManager();
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
         viewGuiController.showCountdown();
-        viewGuiController.bindScore(board.getScore().scoreProperty());
-        viewGuiController.bindLevel(this.levelProperty());
-    }
-
-    public IntegerProperty levelProperty() {
-        return currentLevel;
+        viewGuiController.bindScore(scoreManager.scoreProperty());
+        viewGuiController.bindLevel(scoreManager.levelProperty());
     }
 
     @Override
     public DownData onDownEvent(MoveEvent event) {
         boolean canMove = board.moveBrickDown();
         ClearRow clearRow = null;
+        int bonus = 0;
+
         if (!canMove) {
             board.mergeBrickToBackground();
             clearRow = board.clearRows();
-            if (clearRow.getLinesRemoved() > 0) {
-                totalLinesCleared += clearRow.getLinesRemoved();
-                board.getScore().add(clearRow.getScoreBonus());
-                while (totalLinesCleared >= currentLevel.get() * 10) {
-                    currentLevel.set(currentLevel.get() + 1);
-                    viewGuiController.updateLevel(currentLevel.get());
-                }
-            }
+
+            bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
+
             if (board.createNewBrick()) {
                 viewGuiController.gameOver();
             }
             viewGuiController.refreshGameBackground(board.getBoardMatrix());
         } else {
             if (event.getEventSource() == EventSource.USER) {
-                board.getScore().add(1);
+                scoreManager.onSoftDrop();
             }
         }
-        return new DownData(clearRow, board.getViewData());
+        return new DownData(clearRow, board.getViewData(), bonus);
     }
 
     @Override
@@ -74,14 +67,14 @@ public class GameController implements InputEventListener {
     @Override
     public void createNewGame() {
         board.newGame();
-        totalLinesCleared = 0;
-        currentLevel.set(1);
+        scoreManager.reset();
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
     }
 
     @Override
     public ViewData onHardDropEvent(MoveEvent event){
-        board.hardDrop();
+        int rowsDropped = board.hardDrop();
+        scoreManager.onHardDrop(rowsDropped);
         return board.getViewData();
     }
 

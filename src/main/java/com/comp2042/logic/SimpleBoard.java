@@ -199,12 +199,12 @@ public class SimpleBoard implements Board {
     }
 
     @Override
-    public void hardDrop() {
+    public int hardDrop() {
         int rowsDropped = 0;
         while (moveBrickDown()) {
             rowsDropped++;
         }
-        score.add(rowsDropped * 2);
+        return rowsDropped;
     }
 
     private int getDropPosition() {

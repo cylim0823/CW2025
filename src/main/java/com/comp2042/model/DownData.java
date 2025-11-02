@@ -3,11 +3,15 @@ package com.comp2042.model;
 public final class DownData {
     private final ClearRow clearRow;
     private final ViewData viewData;
+    private final int scoreBonus;
 
-    public DownData(ClearRow clearRow, ViewData viewData) {
+    public DownData(ClearRow clearRow, ViewData viewData, int scoreBonus) {
         this.clearRow = clearRow;
         this.viewData = viewData;
+        this.scoreBonus = scoreBonus;
     }
+
+    public int getScoreBonus(){return scoreBonus; }
 
     public ClearRow getClearRow() {
         return clearRow;
