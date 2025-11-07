@@ -2,8 +2,8 @@ package com.comp2042.ui;
 
 import com.comp2042.logic.InputEventListener;
 import com.comp2042.model.*;
-import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
+import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -57,11 +57,7 @@ public class GuiController implements Initializable {
 
     private InputEventListener eventListener;
     private GameRenderer gameRenderer;
-    private Timeline timeLine;
-    private final BooleanProperty isPause = new SimpleBooleanProperty();
-    private final BooleanProperty isGameOver = new SimpleBooleanProperty();
-    private Label pauseLabel;
-    private final BooleanProperty isCountingDown = new SimpleBooleanProperty(false);
+    private GameLoopManager gameLoopManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -70,26 +66,24 @@ public class GuiController implements Initializable {
         gamePanel.setFocusTraversable(true);
         gamePanel.requestFocus();
 
-        pauseLabel = new Label("PAUSED");
-        pauseLabel.getStyleClass().add("gameOverStyle");
-        pauseLabel.setVisible(false);
-        VBox notificationVBox = (VBox) groupNotification.getChildren().get(0);
-        notificationVBox.getChildren().add(pauseLabel);
+        this.gameRenderer = new GameRenderer(gamePanel, brickPanel, nextBrickPanel, holdBrickPanel);
+        this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel, gameOverPanel, groupNotification);
 
         gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
+                // Ask the manager for the state
                 if (keyEvent.getCode() == KeyCode.P) {
-                    togglePause();
+                    gameLoopManager.togglePause();
                     keyEvent.consume();
                 }
 
-                if (isCountingDown.get()) {
+                if (gameLoopManager.isCountingDownProperty().get()) {
                     keyEvent.consume();
                     return;
                 }
 
-                if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
+                if (!gameLoopManager.isPauseProperty().get() && !gameLoopManager.isGameOverProperty().get()) {
                     if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
                         refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
                         keyEvent.consume();
@@ -138,38 +132,40 @@ public class GuiController implements Initializable {
         reflection.setFraction(0.8);
         reflection.setTopOpacity(0.9);
         reflection.setTopOffset(-12);
-        this.gameRenderer = new GameRenderer(gamePanel, brickPanel, nextBrickPanel, holdBrickPanel);
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
         gameRenderer.initGameView(boardMatrix, brick);
-        timeLine = new Timeline(new KeyFrame(
-                Duration.millis(400),
-                ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
-        ));
-        timeLine.setCycleCount(Timeline.INDEFINITE);
+        gameLoopManager.initGameLoop();
+    }
+
+    private void onGameTick() {
+        moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD));
     }
 
     private void refreshBrick(ViewData brick) {
-        if (isPause.getValue() == Boolean.FALSE) {
-            gameRenderer.refreshBrick(brick);
+        if (gameLoopManager.isPauseProperty().get() || gameLoopManager.isGameOverProperty().get()) {
+            return;
         }
+        gameRenderer.refreshBrick(brick);
     }
 
     public void refreshGameBackground(int[][] board) {
-            gameRenderer.refreshGameBackground(board);
+        gameRenderer.refreshGameBackground(board);
     }
 
     private void moveDown(MoveEvent event) {
-        if (isPause.getValue() == Boolean.FALSE) {
-            DownData downData = eventListener.onDownEvent(event);
-            if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
-                NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getScoreBonus());
-                groupNotification.getChildren().add(notificationPanel);
-                notificationPanel.showScore(groupNotification.getChildren());
-            }
-            refreshBrick(downData.getViewData());
+        if (gameLoopManager.isPauseProperty().get() || gameLoopManager.isGameOverProperty().get()) {
+            return;
         }
+
+        DownData downData = eventListener.onDownEvent(event);
+        if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
+            NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getScoreBonus());
+            groupNotification.getChildren().add(notificationPanel);
+            notificationPanel.showScore(groupNotification.getChildren());
+        }
+        refreshBrick(downData.getViewData());
         gamePanel.requestFocus();
     }
 
@@ -186,21 +182,13 @@ public class GuiController implements Initializable {
     }
 
     public void gameOver() {
-        timeLine.stop();
-        gameOverPanel.setVisible(true);
-        isGameOver.setValue(Boolean.TRUE);
-        groupNotification.toFront();
+        gameLoopManager.gameOver();
     }
 
     public void newGame(ActionEvent actionEvent) {
-        timeLine.stop();
-        gameOverPanel.setVisible(false);
         eventListener.createNewGame();
         gamePanel.requestFocus();
-        updateLevel(1);
-        isPause.setValue(Boolean.FALSE);
-        isGameOver.setValue(Boolean.FALSE);
-        showCountdown();
+        gameLoopManager.newGame();
     }
 
     private void exitGame() {
@@ -212,75 +200,11 @@ public class GuiController implements Initializable {
         gamePanel.requestFocus();
     }
 
-    private void togglePause() {
-        if (isGameOver.get()) {
-            return;
-        }
-        isPause.set(!isPause.get());
-        if (isPause.get()) {
-            timeLine.pause();
-            pauseLabel.setVisible(true);
-        } else {
-            timeLine.play();
-            pauseLabel.setVisible(false);
-        }
-    }
-
     public void updateLevel(int level) {
-        long newSpeed;
-        switch (level) {
-            case 1: newSpeed = 400; break;
-            case 2: newSpeed = 360; break;
-            case 3: newSpeed = 320; break;
-            case 4: newSpeed = 280; break;
-            case 5: newSpeed = 240; break;
-            case 6: newSpeed = 200; break;
-            case 7: newSpeed = 160; break;
-            case 8: newSpeed = 120; break;
-            case 9: newSpeed = 100; break;
-            default: newSpeed = 80; break;
-        }
-
-        timeLine.stop();
-        timeLine = new Timeline(new KeyFrame(
-                Duration.millis(newSpeed),
-                ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
-        ));
-        timeLine.setCycleCount(Timeline.INDEFINITE);
-        timeLine.play();
-    }
-
-    public void startGame() {
-        isCountingDown.set(false);
-        if (timeLine != null) {
-            timeLine.play();
-            gamePanel.requestFocus();
-        }
+        gameLoopManager.updateLevel(level);
     }
 
     public void showCountdown() {
-        isCountingDown.set(true);
-        if (timeLine != null) {
-            timeLine.pause();
-        }
-        IntegerProperty countdown = new SimpleIntegerProperty(3);
-        countdownLabel.textProperty().bind(countdown.asString());
-        countdownLabel.setVisible(true);
-        countdownLabel.toFront();
-        Timeline countdownTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(1), e -> countdown.set(countdown.get() - 1))
-        );
-        countdownTimeline.setCycleCount(3);
-        countdownTimeline.setOnFinished(e -> {
-            countdownLabel.textProperty().unbind();
-            countdownLabel.setText("GO!");
-            PauseTransition goPause = new PauseTransition(Duration.seconds(1));
-            goPause.setOnFinished(event -> {
-                countdownLabel.setVisible(false);
-                startGame();
-            });
-            goPause.play();
-        });
-        countdownTimeline.play();
+        gameLoopManager.showCountdown();
     }
 }
