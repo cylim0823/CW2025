@@ -13,12 +13,13 @@ public interface InputEventListener {
     ViewData onRightEvent(MoveEvent event);
 
 
-
     ViewData onRotateEvent(MoveEvent event);
 
     ViewData onHardDropEvent(MoveEvent event);
 
     ViewData onHoldEvent(MoveEvent event);
 
-    void createNewGame();
+    ViewData createNewGame();
+
+    int[][] getBoard();
 }

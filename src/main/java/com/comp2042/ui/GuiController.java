@@ -186,9 +186,13 @@ public class GuiController implements Initializable {
     }
 
     public void newGame(ActionEvent actionEvent) {
-        eventListener.createNewGame();
+        ViewData initialData = eventListener.createNewGame();
+        int[][] initialBoard = eventListener.getBoard();
         gamePanel.requestFocus();
         gameLoopManager.newGame();
+        // Refresh the UI before the countdown when the user press play again
+        refreshGameBackground(initialBoard);
+        refreshBrick(initialData);
     }
 
     private void exitGame() {
