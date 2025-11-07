@@ -72,7 +72,6 @@ public class GuiController implements Initializable {
         gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
-                // Ask the manager for the state
                 if (keyEvent.getCode() == KeyCode.P) {
                     gameLoopManager.togglePause();
                     keyEvent.consume();
@@ -83,32 +82,46 @@ public class GuiController implements Initializable {
                     return;
                 }
 
-                if (!gameLoopManager.isPauseProperty().get() && !gameLoopManager.isGameOverProperty().get()) {
-                    if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
-                        refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
-                        keyEvent.consume();
+                if (gameLoopManager.isPauseProperty().get() || gameLoopManager.isGameOverProperty().get()) {
+                    // Check for 'New Game' key
+                    if (keyEvent.getCode() == KeyCode.N) {
+                        newGame(null);
                     }
-                    if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.D) {
-                        refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
-                        keyEvent.consume();
+                    return;
+                }
+
+                // --- This block will not run if game is over ---
+                if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
+                    refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
+                    keyEvent.consume();
+                }
+                if (keyEvent.getCode() == KeyCode.RIGHT || keyEvent.getCode() == KeyCode.D) {
+                    refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
+                    keyEvent.consume();
+                }
+                if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.W) {
+                    refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
+                    keyEvent.consume();
+                }
+                if (keyEvent.getCode() == KeyCode.DOWN || keyEvent.getCode() == KeyCode.S) {
+                    moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
+                    keyEvent.consume();
+                }
+                if (keyEvent.getCode() == KeyCode.SPACE) {
+                    DownData downData = eventListener.onHardDropEvent(new MoveEvent(null, EventSource.USER));
+
+                    if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
+                        NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getScoreBonus());
+                        groupNotification.getChildren().add(notificationPanel);
+                        notificationPanel.showScore(groupNotification.getChildren());
                     }
-                    if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.W) {
-                        refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.DOWN || keyEvent.getCode() == KeyCode.S) {
-                        moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.SPACE) {
-                        refreshBrick(eventListener.onHardDropEvent(new MoveEvent(null, EventSource.USER)));
-                        moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
-                        keyEvent.consume();
-                    }
-                    if (keyEvent.getCode() == KeyCode.C) {
-                        refreshBrick(eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER)));
-                        keyEvent.consume();
-                    }
+
+                    refreshBrick(downData.getViewData());
+                    keyEvent.consume();
+                }
+                if (keyEvent.getCode() == KeyCode.C) {
+                    refreshBrick(eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER)));
+                    keyEvent.consume();
                 }
                 if (keyEvent.getCode() == KeyCode.N) {
                     newGame(null);
@@ -144,7 +157,7 @@ public class GuiController implements Initializable {
     }
 
     private void refreshBrick(ViewData brick) {
-        if (gameLoopManager.isPauseProperty().get() || gameLoopManager.isGameOverProperty().get()) {
+        if (gameLoopManager.isPauseProperty().get()) {
             return;
         }
         gameRenderer.refreshBrick(brick);
@@ -155,7 +168,7 @@ public class GuiController implements Initializable {
     }
 
     private void moveDown(MoveEvent event) {
-        if (gameLoopManager.isPauseProperty().get() || gameLoopManager.isGameOverProperty().get()) {
+        if (gameLoopManager.isPauseProperty().get()) {
             return;
         }
 
@@ -190,7 +203,6 @@ public class GuiController implements Initializable {
         int[][] initialBoard = eventListener.getBoard();
         gamePanel.requestFocus();
         gameLoopManager.newGame();
-        // Refresh the UI before the countdown when the user press play again
         refreshGameBackground(initialBoard);
         refreshBrick(initialData);
     }

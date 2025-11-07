@@ -3,7 +3,6 @@ package com.comp2042.logic;
 import com.comp2042.model.*;
 import com.comp2042.ui.GuiController;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 
 public class GameController implements InputEventListener {
 
@@ -28,22 +27,87 @@ public class GameController implements InputEventListener {
         ClearRow clearRow = null;
         int bonus = 0;
 
-        if (!canMove) {
-            board.mergeBrickToBackground();
-            clearRow = board.clearRows();
-
-            bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
-
-            if (board.createNewBrick()) {
-                viewGuiController.gameOver();
-            }
-            viewGuiController.refreshGameBackground(board.getBoardMatrix());
-        } else {
+        if (canMove) {
             if (event.getEventSource() == EventSource.USER) {
                 scoreManager.onSoftDrop();
             }
+            return new DownData(null, board.getViewData(), 0);
         }
-        return new DownData(clearRow, board.getViewData(), bonus);
+
+        ViewData dataBeforeSpawn = board.getViewData();
+        board.mergeBrickToBackground();
+        clearRow = board.clearRows();
+        bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        boolean isGameOver = board.createNewBrick();
+
+        if (isGameOver) {
+            viewGuiController.gameOver();
+
+            // Send empty, invisible data to prevent visual bug
+            ViewData gameOverData = new ViewData(
+                    new int[4][4],
+                    dataBeforeSpawn.getxPosition(),
+                    dataBeforeSpawn.getyPosition(),
+                    new int[4][4],
+                    dataBeforeSpawn.getGhostYPosition(),
+                    dataBeforeSpawn.getHoldBrickData()
+            );
+            return new DownData(clearRow, gameOverData, bonus);
+        } else {
+            return new DownData(clearRow, board.getViewData(), bonus);
+        }
+    }
+
+    @Override
+    public DownData onHardDropEvent(MoveEvent event) {
+        int rowsDropped = board.hardDrop();
+        scoreManager.onHardDrop(rowsDropped);
+
+        ViewData dataBeforeSpawn = board.getViewData();
+        board.mergeBrickToBackground();
+
+        ClearRow clearRow = board.clearRows();
+        int bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        boolean isGameOver = board.createNewBrick();
+
+        if (isGameOver) {
+            viewGuiController.gameOver();
+            // Send empty, invisible data to prevent visual bug
+            ViewData gameOverData = new ViewData(
+                    new int[4][4],
+                    dataBeforeSpawn.getxPosition(),
+                    dataBeforeSpawn.getyPosition(),
+                    new int[4][4],
+                    dataBeforeSpawn.getGhostYPosition(),
+                    dataBeforeSpawn.getHoldBrickData()
+            );
+            return new DownData(clearRow, gameOverData, bonus);
+        } else {
+            return new DownData(clearRow, board.getViewData(), bonus);
+        }
+    }
+
+    @Override
+    public ViewData onHoldEvent(MoveEvent event) {
+        ViewData dataBeforeHold = board.getViewData();
+        boolean isGameOver = board.holdCurrentBrick();
+
+        if (isGameOver) {
+            viewGuiController.gameOver();
+            ViewData gameOverData = new ViewData(
+                    new int[4][4],
+                    dataBeforeHold.getxPosition(),
+                    dataBeforeHold.getyPosition(),
+                    new int[4][4],
+                    dataBeforeHold.getGhostYPosition(),
+                    dataBeforeHold.getHoldBrickData()
+            );
+            return gameOverData;
+        } else {
+            return board.getViewData();
+        }
     }
 
     @Override
@@ -72,20 +136,7 @@ public class GameController implements InputEventListener {
     }
 
     @Override
-    public int[][] getBoard(){
+    public int[][] getBoard() {
         return board.getBoardMatrix();
-    }
-
-    @Override
-    public ViewData onHardDropEvent(MoveEvent event){
-        int rowsDropped = board.hardDrop();
-        scoreManager.onHardDrop(rowsDropped);
-        return board.getViewData();
-    }
-
-    @Override
-    public ViewData onHoldEvent(MoveEvent event) {
-        board.holdCurrentBrick();
-        return board.getViewData();
     }
 }
