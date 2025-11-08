@@ -23,39 +23,55 @@ public class GameController implements InputEventListener {
 
     @Override
     public DownData onDownEvent(MoveEvent event) {
-        boolean canMove = board.moveBrickDown();
+        // Determine how many rows to attempt to move
+        int multiplier = 1;
+
+        // Only apply the multiplier for automatic drops (THREAD)
+        // User soft drop (USER) should always move 1 row.
+        if (event.getEventSource() == EventSource.THREAD) {
+            // Get the multiplier from the ScoreManager
+            multiplier = scoreManager.getDropMultiplier();
+        }
+
+        boolean canMove = true;
+        for (int i = 0; i < multiplier; i++) {
+            if (!board.moveBrickDown()) {
+                canMove = false;
+                break; // Stop trying to move if it hits something
+            }
+        }
+
         ClearRow clearRow = null;
         int bonus = 0;
 
-        if (canMove) {
+        if (!canMove) {
+            ViewData dataBeforeSpawn = board.getViewData();
+            board.mergeBrickToBackground();
+            clearRow = board.clearRows();
+            bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
+            viewGuiController.refreshGameBackground(board.getBoardMatrix());
+            boolean isGameOver = board.createNewBrick();
+
+            if (isGameOver) {
+                viewGuiController.gameOver();
+
+                ViewData gameOverData = new ViewData(
+                        new int[4][4],
+                        dataBeforeSpawn.getxPosition(),
+                        dataBeforeSpawn.getyPosition(),
+                        new int[4][4],
+                        dataBeforeSpawn.getGhostYPosition(),
+                        dataBeforeSpawn.getHoldBrickData()
+                );
+                return new DownData(clearRow, gameOverData, bonus);
+            } else {
+                return new DownData(clearRow, board.getViewData(), bonus);
+            }
+        } else {
             if (event.getEventSource() == EventSource.USER) {
                 scoreManager.onSoftDrop();
             }
             return new DownData(null, board.getViewData(), 0);
-        }
-
-        ViewData dataBeforeSpawn = board.getViewData();
-        board.mergeBrickToBackground();
-        clearRow = board.clearRows();
-        bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
-        viewGuiController.refreshGameBackground(board.getBoardMatrix());
-        boolean isGameOver = board.createNewBrick();
-
-        if (isGameOver) {
-            viewGuiController.gameOver();
-
-            // Send empty, invisible data to prevent visual bug
-            ViewData gameOverData = new ViewData(
-                    new int[4][4],
-                    dataBeforeSpawn.getxPosition(),
-                    dataBeforeSpawn.getyPosition(),
-                    new int[4][4],
-                    dataBeforeSpawn.getGhostYPosition(),
-                    dataBeforeSpawn.getHoldBrickData()
-            );
-            return new DownData(clearRow, gameOverData, bonus);
-        } else {
-            return new DownData(clearRow, board.getViewData(), bonus);
         }
     }
 
@@ -74,7 +90,7 @@ public class GameController implements InputEventListener {
 
         if (isGameOver) {
             viewGuiController.gameOver();
-            // Send empty, invisible data to prevent visual bug
+
             ViewData gameOverData = new ViewData(
                     new int[4][4],
                     dataBeforeSpawn.getxPosition(),

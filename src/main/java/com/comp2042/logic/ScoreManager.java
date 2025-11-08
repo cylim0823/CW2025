@@ -53,4 +53,18 @@ public class ScoreManager {
         score.add(1);
     }
 
+    public int getDropMultiplier() {
+        int level = currentLevel.get(); // Get the current level value
+
+        if (level <= 4) {
+            return 1;
+        } else if (level <= 8) {
+            return 2;
+        } else if (level <= 12) {
+            return 3;
+        } else {
+            return 4;
+        }
+    }
+
 }
