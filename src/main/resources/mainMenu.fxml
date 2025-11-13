@@ -10,7 +10,7 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.comp2042.ui.MainMenuController"
       alignment="CENTER" spacing="30"
-      prefWidth="380" prefHeight="510"
+      prefWidth="1000" prefHeight="700"
       style="-fx-background-color: #2b2b2b;"> <children>
     <Label text="Tetris" textFill="white">
         <font>

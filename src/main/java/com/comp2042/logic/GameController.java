@@ -6,7 +6,7 @@ import javafx.beans.property.IntegerProperty;
 
 public class GameController implements InputEventListener {
 
-    private Board board = new SimpleBoard(25, 10);
+    private Board board = new SimpleBoard(24, 10);
     private final GuiController viewGuiController;
     private final ScoreManager scoreManager;
 

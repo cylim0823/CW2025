@@ -9,10 +9,14 @@
 }
 
 .gameBoard {
-    -fx-border-color: linear-gradient(#2A5058, #61a2b1);
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #69c3f2;
     -fx-border-width: 12px;
-    -fx-border-radius: 12px;
+    -fx-border-insets: -12px;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
 }
+
 
 .nextBrickLabel {
     -fx-font-family: "Let's go Digital";
@@ -62,6 +66,8 @@
     -fx-font-family: "Let's go Digital";
     -fx-font-size: 48;
     -fx-background-color: red;
+    -fx-border-width: 2 0 2 0;
+    -fx-padding: 10 20 10 20;
 }
 
 .scoreClass{
@@ -69,4 +75,8 @@
     -fx-font-size: 38;
     -fx-fill: yellow;
     -fx-text-fill: yellow;
+}
+
+.overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.75);
 }

@@ -23,6 +23,7 @@ import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -39,11 +40,7 @@ public class GuiController implements Initializable {
     @FXML
     private GridPane gamePanel;
     @FXML
-    private Group groupNotification;
-    @FXML
     private GridPane brickPanel;
-    @FXML
-    private GameOverPanel gameOverPanel;
     @FXML
     private GridPane nextBrickPanel;
     @FXML
@@ -54,6 +51,12 @@ public class GuiController implements Initializable {
     private Label levelLabel;
     @FXML
     private Label countdownLabel;
+    @FXML
+    private StackPane rootPane;
+    @FXML
+    private VBox pausePane;
+    @FXML
+    private VBox gameOverPane;
 
     private InputEventListener eventListener;
     private GameRenderer gameRenderer;
@@ -63,17 +66,16 @@ public class GuiController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         Font.loadFont(getClass().getResourceAsStream("/digital.ttf"), 38);
 
-        gamePanel.setFocusTraversable(true);
-        gamePanel.requestFocus();
+        rootPane.requestFocus();
 
-        this.gameRenderer = new GameRenderer(gamePanel, brickPanel, nextBrickPanel, holdBrickPanel);
-        this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel, gameOverPanel, groupNotification);
+        this.gameRenderer = new GameRenderer(gamePanel, nextBrickPanel, holdBrickPanel);
+        this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel);
 
-        gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
+        rootPane.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.P) {
-                    gameLoopManager.togglePause();
+                    handlePauseButton(null);
                     keyEvent.consume();
                 }
 
@@ -85,7 +87,7 @@ public class GuiController implements Initializable {
                 if (gameLoopManager.isPauseProperty().get() || gameLoopManager.isGameOverProperty().get()) {
                     // Check for 'New Game' key
                     if (keyEvent.getCode() == KeyCode.N) {
-                        newGame(null);
+                        handleNewGameButton(null);
                     }
                     return;
                 }
@@ -110,12 +112,6 @@ public class GuiController implements Initializable {
                 if (keyEvent.getCode() == KeyCode.SPACE) {
                     DownData downData = eventListener.onHardDropEvent(new MoveEvent(null, EventSource.USER));
 
-                    if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
-                        NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getScoreBonus());
-                        groupNotification.getChildren().add(notificationPanel);
-                        notificationPanel.showScore(groupNotification.getChildren());
-                    }
-
                     refreshBrick(downData.getViewData());
                     keyEvent.consume();
                 }
@@ -124,32 +120,20 @@ public class GuiController implements Initializable {
                     keyEvent.consume();
                 }
                 if (keyEvent.getCode() == KeyCode.N) {
-                    newGame(null);
+                    handleNewGameButton(null);
                 }
             }
         });
-        gameOverPanel.setVisible(false);
-        gameOverPanel.setOnPlayAgain(this::newGame);
-        gameOverPanel.setOnMainMenu(e -> {
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mainMenu.fxml"));
-                Parent mainMenuRoot = fxmlLoader.load();
-                Stage stage = (Stage) gameOverPanel.getScene().getWindow();
-                Scene scene = new Scene(mainMenuRoot, 450, 510);
-                stage.setScene(scene);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        });
-        final Reflection reflection = new Reflection();
-        reflection.setFraction(0.8);
-        reflection.setTopOpacity(0.9);
-        reflection.setTopOffset(-12);
+
+        gameOverPane.setVisible(false);
+        pausePane.setVisible(false);
+
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
         gameRenderer.initGameView(boardMatrix, brick);
         gameLoopManager.initGameLoop();
+        gameLoopManager.showCountdown();
     }
 
     private void onGameTick() {
@@ -173,13 +157,9 @@ public class GuiController implements Initializable {
         }
 
         DownData downData = eventListener.onDownEvent(event);
-        if (downData.getClearRow() != null && downData.getClearRow().getLinesRemoved() > 0) {
-            NotificationPanel notificationPanel = new NotificationPanel("+" + downData.getScoreBonus());
-            groupNotification.getChildren().add(notificationPanel);
-            notificationPanel.showScore(groupNotification.getChildren());
-        }
+
         refreshBrick(downData.getViewData());
-        gamePanel.requestFocus();
+        rootPane.requestFocus();
     }
 
     public void setEventListener(InputEventListener eventListener) {
@@ -196,24 +176,8 @@ public class GuiController implements Initializable {
 
     public void gameOver() {
         gameLoopManager.gameOver();
-    }
-
-    public void newGame(ActionEvent actionEvent) {
-        ViewData initialData = eventListener.createNewGame();
-        int[][] initialBoard = eventListener.getBoard();
-        gamePanel.requestFocus();
-        gameLoopManager.newGame();
-        refreshGameBackground(initialBoard);
-        refreshBrick(initialData);
-    }
-
-    private void exitGame() {
-        Platform.exit();
-        System.exit(0);
-    }
-
-    public void pauseGame(ActionEvent actionEvent) {
-        gamePanel.requestFocus();
+        gameOverPane.setVisible(true);
+        gameOverPane.toFront();
     }
 
     public void updateLevel(int level) {
@@ -222,5 +186,55 @@ public class GuiController implements Initializable {
 
     public void showCountdown() {
         gameLoopManager.showCountdown();
+    }
+
+    @FXML
+    public void handleNewGameButton(ActionEvent actionEvent) {
+        ViewData initialData = eventListener.createNewGame();
+        int[][] initialBoard = eventListener.getBoard();
+        rootPane.requestFocus();
+
+        // Hide overlays
+        gameOverPane.setVisible(false);
+        pausePane.setVisible(false);
+
+        gameLoopManager.newGame(); // This will start the countdown
+
+        refreshGameBackground(initialBoard);
+        refreshBrick(initialData);
+    }
+
+    @FXML
+    public void handlePauseButton(ActionEvent actionEvent) {
+        gameLoopManager.togglePause();
+        pausePane.setVisible(gameLoopManager.isPauseProperty().get());
+        if (gameLoopManager.isPauseProperty().get()) {
+            pausePane.toFront();
+        }
+        rootPane.requestFocus();
+    }
+
+    @FXML
+    private void handleExitButton(ActionEvent actionEvent) {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    @FXML
+    public void handleMainMenuButton(ActionEvent actionEvent) {
+        try {
+            // Stop the game loop before going to main menu
+            gameLoopManager.gameOver();
+
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mainMenu.fxml"));
+            Parent mainMenuRoot = fxmlLoader.load();
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            stage.setFullScreen(false);
+            // Use the main menu's original size
+            Scene scene = new Scene(mainMenuRoot, 1000, 700);
+            stage.setScene(scene);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 }

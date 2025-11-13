@@ -22,7 +22,7 @@ public class Main extends Application {
         Parent root = fxmlLoader.load();
 
         primaryStage.setTitle("TetrisJFX");
-        Scene scene = new Scene(root, 380, 510);
+        Scene scene = new Scene(root, 1000, 700);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

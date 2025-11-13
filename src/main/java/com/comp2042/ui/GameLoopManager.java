@@ -21,26 +21,10 @@ public class GameLoopManager {
     private long currentSpeedMillis;
     private final Runnable onTickAction;
     private final Label countdownLabel;
-    private final GameOverPanel gameOverPanel;
-    private final Group groupNotification;
-    private final Label pauseLabel;
 
-    public GameLoopManager(Runnable onTickAction, Label countdownLabel, GameOverPanel gameOverPanel, Group groupNotification) {
+    public GameLoopManager(Runnable onTickAction, Label countdownLabel) {
         this.onTickAction = onTickAction;
         this.countdownLabel = countdownLabel;
-        this.gameOverPanel = gameOverPanel;
-        this.groupNotification = groupNotification;
-        this.pauseLabel = new Label("PAUSED");
-        this.pauseLabel.getStyleClass().add("gameOverStyle");
-        this.pauseLabel.setVisible(false);
-
-        try {
-            VBox notificationVBox = (VBox) groupNotification.getChildren().get(0);
-            notificationVBox.getChildren().add(pauseLabel);
-        } catch (Exception e) {
-            System.err.println("Warning: Could not find VBox in groupNotification. Adding pauseLabel directly.");
-            this.groupNotification.getChildren().add(pauseLabel);
-        }
     }
 
     public void initGameLoop() {
@@ -71,27 +55,21 @@ public class GameLoopManager {
         isPause.set(!isPause.get());
         if (isPause.get()) {
             if (timeLine != null) timeLine.pause();
-            pauseLabel.setVisible(true);
         } else {
             if (timeLine != null) timeLine.play();
-            pauseLabel.setVisible(false);
         }
     }
 
     public void gameOver() {
         if (timeLine != null) timeLine.stop();
-        gameOverPanel.setVisible(true);
         isGameOver.setValue(Boolean.TRUE);
-        groupNotification.toFront();
     }
 
     public void newGame() {
         if (timeLine != null) timeLine.stop();
 
-        gameOverPanel.setVisible(false);
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
-        pauseLabel.setVisible(false); // Hide pause label
 
         updateLevel(1); // Reset speed
         showCountdown(); // Start countdown
