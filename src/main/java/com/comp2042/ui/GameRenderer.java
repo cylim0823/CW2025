@@ -31,14 +31,25 @@ public class GameRenderer {
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
+
+        gamePanel.getStyleClass().clear(); // Clear old styles
+        gamePanel.getStyleClass().add("gameBoard");
+
+        nextBrickPanel.getStyleClass().clear();
+        nextBrickPanel.getStyleClass().add("nextBrick");
+
+        holdBrickPanel.getStyleClass().clear();
+        holdBrickPanel.getStyleClass().add("holdBrick");
+
+
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
         ghostRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length];
-        activeRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length]; // This was inside the wrong method
+        activeRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length];
 
         for (int i = HIDDEN_ROWS; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
-                rectangle.setFill(Color.TRANSPARENT);
+                rectangle.setFill(Color.BLACK);
                 displayMatrix[i][j] = rectangle;
                 gamePanel.add(rectangle, j, i - HIDDEN_ROWS);
 
@@ -99,7 +110,6 @@ public class GameRenderer {
             }
         }
 
-        // ADD THIS LOOP (Draw Active Brick)
         for (int i = 0; i < brickData.length; i++) {
             for (int j = 0; j < brickData[i].length; j++) {
                 if (brickData[i][j] != 0) {
@@ -146,7 +156,7 @@ public class GameRenderer {
         Paint returnPaint;
         switch (i) {
             case 0:
-                returnPaint = Color.TRANSPARENT;
+                returnPaint = Color.BLACK;
                 break;
             case 1:
                 returnPaint = Color.AQUA;
@@ -180,7 +190,7 @@ public class GameRenderer {
         Paint returnPaint = getFillColor(i);
         if (returnPaint instanceof Color) {
             Color color = (Color) returnPaint;
-            return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.3);
+            return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.5);
         }
         return returnPaint;
     }

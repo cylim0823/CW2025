@@ -237,4 +237,11 @@ public class GuiController implements Initializable {
             ioException.printStackTrace();
         }
     }
+
+    public void showLineClearNotification(String message) {
+        NotificationPanel notifPanel = new NotificationPanel(message);
+        // Add the new panel to your main StackPane
+        rootPane.getChildren().add(notifPanel);
+        notifPanel.showScore(rootPane.getChildren());
+    }
 }

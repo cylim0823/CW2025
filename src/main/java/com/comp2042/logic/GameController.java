@@ -21,6 +21,44 @@ public class GameController implements InputEventListener {
         viewGuiController.bindLevel(scoreManager.levelProperty());
     }
 
+    private DownData handlePieceLanded(ViewData dataBeforeSpawn) {
+        board.mergeBrickToBackground();
+        ClearRow clearRow = board.clearRows();
+
+        int linesCleared = clearRow.getLinesRemoved();
+        int bonus = scoreManager.onRowsCleared(linesCleared);
+
+        if (linesCleared > 0) {
+            String message = "";
+            switch (linesCleared) {
+                case 1: message = "SINGLE"; break;
+                case 2: message = "DOUBLE"; break;
+                case 3: message = "TRIPLE"; break;
+                case 4: default: message = "TETRIS!"; break;
+            }
+            viewGuiController.showLineClearNotification(message);
+        }
+
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        boolean isGameOver = board.createNewBrick();
+
+        if (isGameOver) {
+            viewGuiController.gameOver();
+            ViewData gameOverData = new ViewData(
+                    new int[4][4],
+                    dataBeforeSpawn.getxPosition(),
+                    dataBeforeSpawn.getyPosition(),
+                    new int[4][4],
+                    dataBeforeSpawn.getGhostYPosition(),
+                    dataBeforeSpawn.getHoldBrickData()
+            );
+            return new DownData(clearRow, gameOverData, bonus);
+        } else {
+            return new DownData(clearRow, board.getViewData(), bonus);
+        }
+    }
+
+
     @Override
     public DownData onDownEvent(MoveEvent event) {
         // Determine how many rows to attempt to move
@@ -41,32 +79,9 @@ public class GameController implements InputEventListener {
             }
         }
 
-        ClearRow clearRow = null;
-        int bonus = 0;
-
         if (!canMove) {
             ViewData dataBeforeSpawn = board.getViewData();
-            board.mergeBrickToBackground();
-            clearRow = board.clearRows();
-            bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
-            viewGuiController.refreshGameBackground(board.getBoardMatrix());
-            boolean isGameOver = board.createNewBrick();
-
-            if (isGameOver) {
-                viewGuiController.gameOver();
-
-                ViewData gameOverData = new ViewData(
-                        new int[4][4],
-                        dataBeforeSpawn.getxPosition(),
-                        dataBeforeSpawn.getyPosition(),
-                        new int[4][4],
-                        dataBeforeSpawn.getGhostYPosition(),
-                        dataBeforeSpawn.getHoldBrickData()
-                );
-                return new DownData(clearRow, gameOverData, bonus);
-            } else {
-                return new DownData(clearRow, board.getViewData(), bonus);
-            }
+            return handlePieceLanded(dataBeforeSpawn);
         } else {
             if (event.getEventSource() == EventSource.USER) {
                 scoreManager.onSoftDrop();
@@ -81,28 +96,7 @@ public class GameController implements InputEventListener {
         scoreManager.onHardDrop(rowsDropped);
 
         ViewData dataBeforeSpawn = board.getViewData();
-        board.mergeBrickToBackground();
-
-        ClearRow clearRow = board.clearRows();
-        int bonus = scoreManager.onRowsCleared(clearRow.getLinesRemoved());
-        viewGuiController.refreshGameBackground(board.getBoardMatrix());
-        boolean isGameOver = board.createNewBrick();
-
-        if (isGameOver) {
-            viewGuiController.gameOver();
-
-            ViewData gameOverData = new ViewData(
-                    new int[4][4],
-                    dataBeforeSpawn.getxPosition(),
-                    dataBeforeSpawn.getyPosition(),
-                    new int[4][4],
-                    dataBeforeSpawn.getGhostYPosition(),
-                    dataBeforeSpawn.getHoldBrickData()
-            );
-            return new DownData(clearRow, gameOverData, bonus);
-        } else {
-            return new DownData(clearRow, board.getViewData(), bonus);
-        }
+        return handlePieceLanded(dataBeforeSpawn);
     }
 
     @Override
