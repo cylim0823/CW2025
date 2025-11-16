@@ -45,26 +45,11 @@ public class ScoreManager {
     }
 
     public void onHardDrop(int rowsDropped){
-        int scoreBonus = rowsDropped * 2;
+        int scoreBonus = rowsDropped * 1;
         score.add(scoreBonus);
     }
 
     public void onSoftDrop(){
         score.add(1);
     }
-
-    public int getDropMultiplier() {
-        int level = currentLevel.get(); // Get the current level value
-
-        if (level <= 4) {
-            return 1;
-        } else if (level <= 8) {
-            return 2;
-        } else if (level <= 12) {
-            return 3;
-        } else {
-            return 4;
-        }
-    }
-
 }

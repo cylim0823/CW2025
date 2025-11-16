@@ -226,11 +226,9 @@ public class GuiController implements Initializable {
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mainMenu.fxml"));
             Parent mainMenuRoot = fxmlLoader.load();
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            stage.setFullScreen(false);
-            // Use the main menu's original size
-            Scene scene = new Scene(mainMenuRoot, 1000, 700);
-            stage.setScene(scene);
+            Scene currentScene = rootPane.getScene();
+            // Just replace the root of the existing scene
+            currentScene.setRoot(mainMenuRoot);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }

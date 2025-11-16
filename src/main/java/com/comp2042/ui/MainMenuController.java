@@ -8,7 +8,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,17 +29,10 @@ public class MainMenuController {
         Parent root = fxmlLoader.load();
         GuiController c = fxmlLoader.getController();
 
-        // Get the current window (Stage) from the button
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Scene currentScene = ((Node) event.getSource()).getScene();
 
-        // Create the new game scene
-        Scene scene = new Scene(root, 1000, 700);
-
-        // Set the window to show the new game scene
-        stage.setScene(scene);
-        stage.show();
-
-        // Start the game logic
+        // Just replace the root of the existing scene
+        currentScene.setRoot(root);
         new GameController(c);
     }
 

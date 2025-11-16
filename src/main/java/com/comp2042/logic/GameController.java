@@ -21,6 +21,10 @@ public class GameController implements InputEventListener {
         viewGuiController.showCountdown();
         viewGuiController.bindScore(scoreManager.scoreProperty());
         viewGuiController.bindLevel(scoreManager.levelProperty());
+
+        scoreManager.levelProperty().addListener((obs, oldLevel, newLevel) -> {
+            viewGuiController.updateLevel(newLevel.intValue());
+        });
     }
 
     private DownData handlePieceLanded(ViewData dataBeforeSpawn) {
@@ -60,33 +64,17 @@ public class GameController implements InputEventListener {
         }
     }
 
-
     @Override
     public DownData onDownEvent(MoveEvent event) {
-        // Determine how many rows to attempt to move
-        int multiplier = 1;
 
-        // Only apply the multiplier for automatic drops (THREAD)
-        // User soft drop (USER) should always move 1 row.
-        if (event.getEventSource() == EventSource.THREAD) {
-            // Get the multiplier from the ScoreManager
-            multiplier = scoreManager.getDropMultiplier();
-        }
-
-        boolean canMove = true;
-        for (int i = 0; i < multiplier; i++) {
-            if (!board.moveBrickDown()) {
-                canMove = false;
-                break; // Stop trying to move if it hits something
-            }
-        }
+        boolean canMove = board.moveBrickDown();
 
         if (!canMove) {
             ViewData dataBeforeSpawn = board.getViewData();
             return handlePieceLanded(dataBeforeSpawn);
         } else {
             if (event.getEventSource() == EventSource.USER) {
-                scoreManager.onSoftDrop();
+                scoreManager.onSoftDrop(); // score calculator
             }
             return new DownData(null, board.getViewData(), 0);
         }
@@ -95,7 +83,7 @@ public class GameController implements InputEventListener {
     @Override
     public DownData onHardDropEvent(MoveEvent event) {
         int rowsDropped = board.hardDrop();
-        scoreManager.onHardDrop(rowsDropped);
+        scoreManager.onHardDrop(rowsDropped); // score calculator
 
         ViewData dataBeforeSpawn = board.getViewData();
         return handlePieceLanded(dataBeforeSpawn);
