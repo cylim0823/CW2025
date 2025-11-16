@@ -12,6 +12,8 @@ public class RandomBrickGenerator implements BrickGenerator {
 
     private final Deque<Brick> nextBricks = new ArrayDeque<>();
 
+    private static final int PREVIEW_COUNT = 4;
+
     public RandomBrickGenerator() {
         brickList = new ArrayList<>();
         brickList.add(new IBrick());
@@ -21,20 +23,29 @@ public class RandomBrickGenerator implements BrickGenerator {
         brickList.add(new SBrick());
         brickList.add(new TBrick());
         brickList.add(new ZBrick());
-        nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
-        nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+
+        fillQueue(); // 1 to play and 4 for preview
+    }
+
+    private void fillQueue(){
+        while(nextBricks.size() <= PREVIEW_COUNT){
+            nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+        }
     }
 
     @Override
     public Brick getBrick() {
-        if (nextBricks.size() <= 1) {
-            nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
-        }
-        return nextBricks.poll();
+        fillQueue();
+        return nextBricks.poll(); // Take the next brick
     }
 
     @Override
     public Brick getNextBrick() {
-        return nextBricks.peek();
+        return nextBricks.peek(); // shows the next one
+    }
+
+    @Override
+    public List<Brick> getUpcomingBricks() {
+        return new ArrayList<>(nextBricks);
     }
 }

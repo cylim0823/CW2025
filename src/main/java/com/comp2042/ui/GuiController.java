@@ -40,9 +40,7 @@ public class GuiController implements Initializable {
     @FXML
     private GridPane gamePanel;
     @FXML
-    private GridPane brickPanel;
-    @FXML
-    private GridPane nextBrickPanel;
+    private VBox nextBricksContainer;
     @FXML
     private GridPane holdBrickPanel;
     @FXML
@@ -68,7 +66,7 @@ public class GuiController implements Initializable {
 
         rootPane.requestFocus();
 
-        this.gameRenderer = new GameRenderer(gamePanel, nextBrickPanel, holdBrickPanel);
+        this.gameRenderer = new GameRenderer(gamePanel, nextBricksContainer, holdBrickPanel);
         this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel);
 
         rootPane.setOnKeyPressed(new EventHandler<KeyEvent>() {

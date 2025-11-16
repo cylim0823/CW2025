@@ -2,31 +2,34 @@ package com.comp2042.ui;
 
 import com.comp2042.model.ViewData;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameRenderer {
 
     private static final int BRICK_SIZE = 25;
     private static final int HIDDEN_ROWS = 4;
-    private static final int GAP = 1;
+    private static final int PREVIEW_COUNT = 4;
 
     private final GridPane gamePanel;
-    private final GridPane nextBrickPanel;
+    private final VBox nextBricksContainer;
     private final GridPane holdBrickPanel;
 
     // For drawing
     private Rectangle[][] displayMatrix;
     private Rectangle[][] ghostRectangles;
     private Rectangle[][] activeRectangles;
-    private Rectangle[][] nextBrickRectangles;
+    private List<Rectangle[][]> nextBrickRectangleList;
     private Rectangle[][] holdBrickRectangles;
 
     // Constructor
-    public GameRenderer(GridPane gamePanel, GridPane nextBrickPanel, GridPane holdBrickPanel){
+    public GameRenderer(GridPane gamePanel, VBox nextBricksContainer, GridPane holdBrickPanel){
         this.gamePanel = gamePanel;
-        this.nextBrickPanel = nextBrickPanel;
+        this.nextBricksContainer = nextBricksContainer;
         this.holdBrickPanel = holdBrickPanel;
     }
 
@@ -34,9 +37,6 @@ public class GameRenderer {
 
         gamePanel.getStyleClass().clear(); // Clear old styles
         gamePanel.getStyleClass().add("gameBoard");
-
-        nextBrickPanel.getStyleClass().clear();
-        nextBrickPanel.getStyleClass().add("nextBrick");
 
         holdBrickPanel.getStyleClass().clear();
         holdBrickPanel.getStyleClass().add("holdBrick");
@@ -66,14 +66,27 @@ public class GameRenderer {
         }
 
         // Initialize next/hold panels
-        nextBrickRectangles = new Rectangle[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
-                rectangle.setFill(Color.TRANSPARENT);
-                nextBrickRectangles[i][j] = rectangle;
-                nextBrickPanel.add(rectangle, j, i);
+        nextBricksContainer.getChildren().clear();
+        nextBrickRectangleList = new ArrayList<>();
+
+        for (int n = 0; n < PREVIEW_COUNT; n++) {
+            GridPane previewPanel = new GridPane();
+            previewPanel.setStyle("-fx-background-color: transparent;");
+            previewPanel.setHgap(1);
+            previewPanel.setVgap(1);
+
+            Rectangle[][] previewRectangles = new Rectangle[4][4];
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                    rectangle.setFill(Color.TRANSPARENT);
+                    previewRectangles[i][j] = rectangle;
+                    previewPanel.add(rectangle, j, i);
+                }
             }
+
+            nextBrickRectangleList.add(previewRectangles);
+            nextBricksContainer.getChildren().add(previewPanel);
         }
         holdBrickRectangles = new Rectangle[4][4];
         for (int i = 0; i < 4; i++) {
@@ -87,7 +100,6 @@ public class GameRenderer {
     }
 
     public void refreshBrick(ViewData brick) {
-        // REPLACE the old clearing loop
         for (int i = HIDDEN_ROWS; i < ghostRectangles.length; i++) {
             for (int j = 0; j < ghostRectangles[i].length; j++) {
                 ghostRectangles[i][j].setFill(Color.TRANSPARENT);
@@ -122,15 +134,30 @@ public class GameRenderer {
             }
         }
 
-        refreshNextBrickPreview(brick);
+        refreshUpcomingBricks(brick);
         refreshHoldBrick(brick);
     }
 
-    public void refreshNextBrickPreview(ViewData brick) {
-        if (brick.getNextBrickData() != null) {
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    nextBrickRectangles[i][j].setFill(getFillColor(brick.getNextBrickData()[i][j]));
+    public void refreshUpcomingBricks(ViewData brick) {
+        List<int[][]> dataList = brick.getUpcomingBricksData();
+
+        for (int panelIndex = 0; panelIndex < nextBrickRectangleList.size(); panelIndex++) {
+
+            Rectangle[][] currentPanelRects = nextBrickRectangleList.get(panelIndex);
+
+            if (panelIndex < dataList.size()) {
+                int[][] data = dataList.get(panelIndex);
+
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        currentPanelRects[i][j].setFill(getFillColor(data[i][j]));
+                    }
+                }
+            } else {
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        currentPanelRects[i][j].setFill(Color.TRANSPARENT);
+                    }
                 }
             }
         }

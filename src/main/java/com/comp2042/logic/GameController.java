@@ -4,6 +4,8 @@ import com.comp2042.model.*;
 import com.comp2042.ui.GuiController;
 import javafx.beans.property.IntegerProperty;
 
+import java.util.ArrayList;
+
 public class GameController implements InputEventListener {
 
     private Board board = new SimpleBoard(24, 10);
@@ -48,7 +50,7 @@ public class GameController implements InputEventListener {
                     new int[4][4],
                     dataBeforeSpawn.getxPosition(),
                     dataBeforeSpawn.getyPosition(),
-                    new int[4][4],
+                    new ArrayList<>(),
                     dataBeforeSpawn.getGhostYPosition(),
                     dataBeforeSpawn.getHoldBrickData()
             );
@@ -110,7 +112,7 @@ public class GameController implements InputEventListener {
                     new int[4][4],
                     dataBeforeHold.getxPosition(),
                     dataBeforeHold.getyPosition(),
-                    new int[4][4],
+                    new ArrayList<>(),
                     dataBeforeHold.getGhostYPosition(),
                     dataBeforeHold.getHoldBrickData()
             );
@@ -142,6 +144,7 @@ public class GameController implements InputEventListener {
     public ViewData createNewGame() {
         board.newGame();
         scoreManager.reset();
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
         return board.getViewData();
     }
 

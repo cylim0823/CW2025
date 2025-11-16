@@ -10,6 +10,8 @@ import com.comp2042.model.ViewData;
 import com.comp2042.util.MatrixOperations;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleBoard implements Board {
 
@@ -23,10 +25,10 @@ public class SimpleBoard implements Board {
     private Brick heldBrick;
     private boolean canHold;
 
-    public SimpleBoard(int width, int height) {
-        this.width = width;
+    public SimpleBoard(int height, int width) {
         this.height = height;
-        currentGameMatrix = new int[width][height];
+        this.width = width;
+        currentGameMatrix = new int[height][width];
         brickGenerator = new RandomBrickGenerator();
         brickRotator = new BrickRotator();
         score = new Score();
@@ -70,7 +72,7 @@ public class SimpleBoard implements Board {
 
     @Override
     public void newGame() {
-        currentGameMatrix = new int[width][height];
+        currentGameMatrix = new int[height][width];
         score.reset();
         heldBrick = null;
         canHold = true;
@@ -81,11 +83,18 @@ public class SimpleBoard implements Board {
     public ViewData getViewData() {
         int ghostY = getDropPosition();
         int[][] holdData = heldBrick != null ? heldBrick.getShapeMatrix().get(0) : new int[4][4];
+
+        List<Brick> upcomingBricks = brickGenerator.getUpcomingBricks();
+
+        List<int[][]> upcomingData = new ArrayList<>();
+        for (Brick b : upcomingBricks) {
+            upcomingData.add(b.getShapeMatrix().get(0)); // Get the default shape
+        }
         return new ViewData(
                 brickRotator.getCurrentShape(),
                 (int) currentOffset.getX(),
                 (int) currentOffset.getY(),
-                brickGenerator.getNextBrick().getShapeMatrix().get(0),
+                upcomingData,
                 ghostY,
                 holdData
         );
