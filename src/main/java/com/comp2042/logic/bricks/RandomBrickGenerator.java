@@ -2,50 +2,59 @@ package com.comp2042.logic.bricks;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomBrickGenerator implements BrickGenerator {
 
-    private final List<Brick> brickList;
+    private final ArrayList<Brick> bag = new ArrayList<>();
 
     private final Deque<Brick> nextBricks = new ArrayDeque<>();
 
     private static final int PREVIEW_COUNT = 4;
 
     public RandomBrickGenerator() {
-        brickList = new ArrayList<>();
-        brickList.add(new IBrick());
-        brickList.add(new JBrick());
-        brickList.add(new LBrick());
-        brickList.add(new OBrick());
-        brickList.add(new SBrick());
-        brickList.add(new TBrick());
-        brickList.add(new ZBrick());
-
-        fillQueue(); // 1 to play and 4 for preview
+        fillQueue();
     }
 
-    private void fillQueue(){
-        while(nextBricks.size() <= PREVIEW_COUNT){
-            nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+    private Brick getNextBrickFromBag() {
+        if (bag.isEmpty()) {
+            bag.add(new IBrick());
+            bag.add(new JBrick());
+            bag.add(new LBrick());
+            bag.add(new OBrick());
+            bag.add(new SBrick());
+            bag.add(new TBrick());
+            bag.add(new ZBrick());
+
+            Collections.shuffle(bag);
+        }
+        return bag.remove(0);
+    }
+
+    // This method's job is to keep the 'nextBricks' queue full
+    private void fillQueue() {
+        while (nextBricks.size() <= PREVIEW_COUNT) {
+            nextBricks.add(getNextBrickFromBag());
         }
     }
 
     @Override
     public Brick getBrick() {
         fillQueue();
-        return nextBricks.poll(); // Take the next brick
+        return nextBricks.poll();
     }
 
     @Override
     public Brick getNextBrick() {
-        return nextBricks.peek(); // shows the next one
+        fillQueue();
+        return nextBricks.peek();
     }
 
     @Override
     public List<Brick> getUpcomingBricks() {
+        fillQueue();
         return new ArrayList<>(nextBricks);
     }
 }
