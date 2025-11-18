@@ -35,8 +35,7 @@ public class GameRenderer {
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
 
-        gamePanel.getStyleClass().clear(); // Clear old styles
-        gamePanel.getStyleClass().add("gameBoard");
+
 
         holdBrickPanel.getStyleClass().clear();
         holdBrickPanel.getStyleClass().add("holdBrick");

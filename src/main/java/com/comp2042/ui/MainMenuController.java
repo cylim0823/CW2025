@@ -33,7 +33,7 @@ public class MainMenuController {
 
         // Just replace the root of the existing scene
         currentScene.setRoot(root);
-        new GameController(c);
+        c.startNewGame();
     }
 
     /**

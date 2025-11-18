@@ -6,20 +6,21 @@ import com.comp2042.model.ViewData;
 
 public interface InputEventListener {
 
-    DownData onDownEvent(MoveEvent event);
+    void onDownEvent(MoveEvent event);
 
-    ViewData onLeftEvent(MoveEvent event);
+    void onLeftEvent(MoveEvent event);
 
-    ViewData onRightEvent(MoveEvent event);
+    void onRightEvent(MoveEvent event);
 
+    void onRotateEvent(MoveEvent event);
 
-    ViewData onRotateEvent(MoveEvent event);
+    void onHardDropEvent(MoveEvent event);
 
-    DownData onHardDropEvent(MoveEvent event);
-
-    ViewData onHoldEvent(MoveEvent event);
+    void onHoldEvent(MoveEvent event);
 
     ViewData createNewGame();
+
+    ViewData getViewData();
 
     int[][] getBoard();
 }
