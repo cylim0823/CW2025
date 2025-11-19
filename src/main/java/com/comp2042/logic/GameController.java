@@ -1,38 +1,82 @@
 package com.comp2042.logic;
 
 import com.comp2042.model.*;
-import com.comp2042.ui.GuiController;
-import javafx.beans.property.IntegerProperty;
-
 import java.util.ArrayList;
+import java.util.List;
 
 public class GameController implements InputEventListener {
 
-    private Board board = new SimpleBoard(24, 10);
-    private final GuiController viewGuiController;
+    private final Board board;
     private final ScoreManager scoreManager;
+    private final List<GameObserver> observers = new ArrayList<>();
 
-    public GameController(GuiController c) {
-        viewGuiController = c;
-        scoreManager = new ScoreManager();
-        board.createNewBrick();
-        viewGuiController.setEventListener(this);
-        viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
-        viewGuiController.showCountdown();
-        viewGuiController.bindScore(scoreManager.scoreProperty());
-        viewGuiController.bindLevel(scoreManager.levelProperty());
+    public GameController() {
+        this.board = new SimpleBoard(24, 10);
+        this.scoreManager = new ScoreManager();
+        this.board.createNewBrick();
 
-        scoreManager.levelProperty().addListener((obs, oldLevel, newLevel) -> {
-            viewGuiController.updateLevel(newLevel.intValue());
-        });
+        scoreManager.scoreProperty().addListener((obs, oldVal, newVal) -> notifyScore(newVal.intValue()));
+        scoreManager.levelProperty().addListener((obs, oldVal, newVal) -> notifyLevel(newVal.intValue()));
     }
 
-    private DownData handlePieceLanded(ViewData dataBeforeSpawn) {
+    // Observer management
+
+    public void addObserver(GameObserver observer) {
+        observers.add(observer);
+        observer.onGameBackgroundUpdated(board.getBoardMatrix());
+        observer.onBoardUpdated(board.getViewData());
+        observer.onScoreUpdated(scoreManager.scoreProperty().get());
+        observer.onLevelUpdated(scoreManager.levelProperty().get());
+    }
+
+    // Notification helpers
+
+    private void notifyBoard() {
+        ViewData data = board.getViewData();
+        for (GameObserver o : observers) {
+            o.onBoardUpdated(data);
+        }
+    }
+
+    private void notifyBackground() {
+        int[][] matrix = board.getBoardMatrix();
+        for (GameObserver o : observers) {
+            o.onGameBackgroundUpdated(matrix);
+        }
+    }
+
+    private void notifyScore(int score) {
+        for (GameObserver o : observers) {
+            o.onScoreUpdated(score);
+        }
+    }
+
+    private void notifyLevel(int level) {
+        for (GameObserver o : observers) {
+            o.onLevelUpdated(level);
+        }
+    }
+
+    private void notifyGameOver() {
+        for (GameObserver o : observers) {
+            o.onGameOver();
+        }
+    }
+
+    private void notifyLineClear(String message) {
+        for (GameObserver o : observers) {
+            o.onLineCleared(message);
+        }
+    }
+
+    // Game logic
+
+    private void handlePieceLanded() {
         board.mergeBrickToBackground();
         ClearRow clearRow = board.clearRows();
 
         int linesCleared = clearRow.getLinesRemoved();
-        int bonus = scoreManager.onRowsCleared(linesCleared);
+        scoreManager.onRowsCleared(linesCleared);
 
         if (linesCleared > 0) {
             String message = "";
@@ -42,102 +86,86 @@ public class GameController implements InputEventListener {
                 case 3: message = "TRIPLE"; break;
                 case 4: default: message = "TETRIS!"; break;
             }
-            viewGuiController.showLineClearNotification(message);
+            notifyLineClear(message);
         }
 
-        viewGuiController.refreshGameBackground(board.getBoardMatrix());
-        boolean isGameOver = board.createNewBrick();
+        notifyBackground(); // The pile changed, redraw it.
 
+        boolean isGameOver = board.createNewBrick();
         if (isGameOver) {
-            viewGuiController.gameOver();
-            ViewData gameOverData = new ViewData(
-                    new int[4][4],
-                    dataBeforeSpawn.getxPosition(),
-                    dataBeforeSpawn.getyPosition(),
-                    new ArrayList<>(),
-                    dataBeforeSpawn.getGhostYPosition(),
-                    dataBeforeSpawn.getHoldBrickData()
-            );
-            return new DownData(clearRow, gameOverData, bonus);
+            notifyGameOver();
         } else {
-            return new DownData(clearRow, board.getViewData(), bonus);
+            notifyBoard(); // Show the new active piece
         }
     }
 
-    @Override
-    public DownData onDownEvent(MoveEvent event) {
+    // Input events
 
+    @Override
+    public void onDownEvent(MoveEvent event) {
         boolean canMove = board.moveBrickDown();
 
         if (!canMove) {
-            ViewData dataBeforeSpawn = board.getViewData();
-            return handlePieceLanded(dataBeforeSpawn);
+            handlePieceLanded();
         } else {
             if (event.getEventSource() == EventSource.USER) {
-                scoreManager.onSoftDrop(); // score calculator
+                scoreManager.onSoftDrop();
             }
-            return new DownData(null, board.getViewData(), 0);
+            notifyBoard(); // Piece moved, tell UI to update
         }
     }
 
     @Override
-    public DownData onHardDropEvent(MoveEvent event) {
+    public void onHardDropEvent(MoveEvent event) {
         int rowsDropped = board.hardDrop();
-        scoreManager.onHardDrop(rowsDropped); // score calculator
-
-        ViewData dataBeforeSpawn = board.getViewData();
-        return handlePieceLanded(dataBeforeSpawn);
+        scoreManager.onHardDrop(rowsDropped);
+        handlePieceLanded();
     }
 
     @Override
-    public ViewData onHoldEvent(MoveEvent event) {
-        ViewData dataBeforeHold = board.getViewData();
+    public void onHoldEvent(MoveEvent event) {
         boolean isGameOver = board.holdCurrentBrick();
-
         if (isGameOver) {
-            viewGuiController.gameOver();
-            ViewData gameOverData = new ViewData(
-                    new int[4][4],
-                    dataBeforeHold.getxPosition(),
-                    dataBeforeHold.getyPosition(),
-                    new ArrayList<>(),
-                    dataBeforeHold.getGhostYPosition(),
-                    dataBeforeHold.getHoldBrickData()
-            );
-            return gameOverData;
+            notifyGameOver();
         } else {
-            return board.getViewData();
+            notifyBoard();
         }
     }
 
     @Override
-    public ViewData onLeftEvent(MoveEvent event) {
+    public void onLeftEvent(MoveEvent event) {
         board.moveBrickLeft();
-        return board.getViewData();
+        notifyBoard();
     }
 
     @Override
-    public ViewData onRightEvent(MoveEvent event) {
+    public void onRightEvent(MoveEvent event) {
         board.moveBrickRight();
-        return board.getViewData();
+        notifyBoard();
     }
 
     @Override
-    public ViewData onRotateEvent(MoveEvent event) {
+    public void onRotateEvent(MoveEvent event) {
         board.rotateLeftBrick();
-        return board.getViewData();
+        notifyBoard();
     }
 
     @Override
     public ViewData createNewGame() {
         board.newGame();
         scoreManager.reset();
-        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        notifyBackground();
+        notifyBoard();
         return board.getViewData();
     }
 
     @Override
     public int[][] getBoard() {
         return board.getBoardMatrix();
+    }
+
+    @Override
+    public ViewData getViewData() {
+        return board.getViewData();
     }
 }

@@ -46,26 +46,25 @@ public class KeyManager {
             switch (code) {
                 case LEFT:
                 case A:
-                    guiController.refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
+                    eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER));
                     break;
                 case RIGHT:
                 case D:
-                    guiController.refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
+                    eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER));
                     break;
                 case UP:
                 case W:
-                    guiController.refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
+                    eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER));
                     break;
                 case DOWN:
                 case S:
                     guiController.moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
                     break;
                 case SPACE:
-                    DownData downData = eventListener.onHardDropEvent(new MoveEvent(null, EventSource.USER));
-                    guiController.refreshBrick(downData.getViewData());
+                    eventListener.onHardDropEvent(new MoveEvent(null, EventSource.USER));
                     break;
                 case C:
-                    guiController.refreshBrick(eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER)));
+                    eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER));
                     break;
                 case N:
                     guiController.startNewGame();

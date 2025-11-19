@@ -1,9 +1,9 @@
 package com.comp2042.ui;
 
+import com.comp2042.logic.GameController;
 import com.comp2042.logic.InputEventListener;
 import com.comp2042.model.*;
 import javafx.application.Platform;
-import javafx.beans.property.IntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,9 +19,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class GuiController implements Initializable {
+public class GuiController implements Initializable, GameObserver {
 
-    // Constants
     private static final String FONT_PATH = "/digital.ttf";
     private static final double FONT_SIZE = 38;
 
@@ -35,85 +34,95 @@ public class GuiController implements Initializable {
     @FXML private VBox pausePane;
     @FXML private VBox gameOverPane;
 
-    private InputEventListener eventListener;
     private GameRenderer gameRenderer;
     private GameLoopManager gameLoopManager;
     private KeyManager keyManager;
 
+    // The logic interface we talk to GameController
+    private InputEventListener eventListener;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadCustomFont();
-
         rootPane.requestFocus();
 
         this.gameRenderer = new GameRenderer(gamePanel, nextBricksContainer, holdBrickPanel);
         this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel);
-
         this.keyManager = new KeyManager(this, gameLoopManager);
+        GameController logic = new GameController();
+
+        gameRenderer.initGameView(logic.getBoard(), logic.getViewData());
+        gameLoopManager.initGameLoop();
+        logic.addObserver(this);
+
+        this.setEventListener(logic);
         rootPane.setOnKeyPressed(keyManager::handleInput);
 
         resetUIState();
     }
 
-    private void loadCustomFont() {
-        try {
-            Font.loadFont(getClass().getResourceAsStream(FONT_PATH), FONT_SIZE);
-        } catch (Exception e) {
-            System.err.println("Could not load font: " + FONT_PATH);
-        }
+    // Observer methods (Automatic updates from logic)
+
+    @Override
+    public void onBoardUpdated(ViewData viewData) {
+        gameRenderer.refreshBrick(viewData);
     }
 
-
-    public void initGameView(int[][] boardMatrix, ViewData brick) {
-        gameRenderer.initGameView(boardMatrix, brick);
-        gameLoopManager.initGameLoop();
-        gameLoopManager.showCountdown();
+    @Override
+    public void onGameBackgroundUpdated(int[][] boardMatrix) {
+        gameRenderer.refreshGameBackground(boardMatrix);
     }
 
+    @Override
+    public void onScoreUpdated(int score) {
+        Platform.runLater(() -> scoreLabel.setText("Score: " + score));
+    }
+
+    @Override
+    public void onLevelUpdated(int level) {
+        Platform.runLater(() -> levelLabel.setText("Level: " + level));
+        gameLoopManager.updateLevel(level);
+    }
+
+    @Override
+    public void onLineCleared(String message) {
+        Platform.runLater(() -> showLineClearNotification(message));
+    }
+
+    @Override
+    public void onGameOver() {
+        Platform.runLater(() -> {
+            gameLoopManager.gameOver();
+            gameOverPane.setVisible(true);
+            gameOverPane.toFront();
+        });
+    }
+
+    // Helper methods
     private void onGameTick() {
-        moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD));
-    }
-
-    public void refreshBrick(ViewData brick) {
-        if (gameLoopManager.isPauseProperty().get()) {
-            return;
+        if (eventListener != null) {
+            eventListener.onDownEvent(new MoveEvent(EventType.DOWN, EventSource.THREAD));
         }
-        gameRenderer.refreshBrick(brick);
-    }
-
-    public void refreshGameBackground(int[][] board) {
-        gameRenderer.refreshGameBackground(board);
     }
 
     public void moveDown(MoveEvent event) {
-        if (gameLoopManager.isPauseProperty().get()) {
-            return;
-        }
-        DownData downData = eventListener.onDownEvent(event);
-        refreshBrick(downData.getViewData());
-        rootPane.requestFocus();
+        if (gameLoopManager.isPauseProperty().get()) return;
+        eventListener.onDownEvent(event);
     }
 
     public void startNewGame() {
-        ViewData initialData = eventListener.createNewGame();
-        int[][] initialBoard = eventListener.getBoard();
+        eventListener.createNewGame();
 
         resetUIState();
         rootPane.requestFocus();
-
         gameLoopManager.newGame();
-        refreshGameBackground(initialBoard);
-        refreshBrick(initialData);
     }
 
     public void togglePause() {
         gameLoopManager.togglePause();
         boolean isPaused = gameLoopManager.isPauseProperty().get();
-
         pausePane.setVisible(isPaused);
-        if (isPaused) {
-            pausePane.toFront();
-        }
+        if(isPaused) pausePane.toFront();
         rootPane.requestFocus();
     }
 
@@ -124,32 +133,10 @@ public class GuiController implements Initializable {
         }
     }
 
-    public void bindScore(IntegerProperty integerProperty) {
-        scoreLabel.textProperty().bind(integerProperty.asString("Score: %d"));
-    }
-
-    public void bindLevel(IntegerProperty integerProperty) {
-        levelLabel.textProperty().bind(integerProperty.asString("Level: %d"));
-    }
-
-    public void updateLevel(int level) {
-        gameLoopManager.updateLevel(level);
-    }
-
-    public void showCountdown() {
-        gameLoopManager.showCountdown();
-    }
-
     public void showLineClearNotification(String message) {
         NotificationPanel notifPanel = new NotificationPanel(message);
         rootPane.getChildren().add(notifPanel);
         notifPanel.showScore(rootPane.getChildren());
-    }
-
-    public void gameOver() {
-        gameLoopManager.gameOver();
-        gameOverPane.setVisible(true);
-        gameOverPane.toFront();
     }
 
     private void resetUIState() {
@@ -157,25 +144,18 @@ public class GuiController implements Initializable {
         pausePane.setVisible(false);
     }
 
-
-    @FXML
-    public void handleNewGameButton(ActionEvent actionEvent) {
-        startNewGame();
+    private void loadCustomFont() {
+        try {
+            Font.loadFont(getClass().getResourceAsStream(FONT_PATH), FONT_SIZE);
+        } catch (Exception e) {
+            System.err.println("Could not load font: " + FONT_PATH);
+        }
     }
 
-    @FXML
-    public void handlePauseButton(ActionEvent actionEvent) {
-        togglePause();
-    }
-
-    @FXML
-    private void handleExitButton(ActionEvent actionEvent) {
-        Platform.exit();
-        System.exit(0);
-    }
-
-    @FXML
-    public void handleMainMenuButton(ActionEvent actionEvent) {
+    // Button handlers
+    @FXML public void handleNewGameButton(ActionEvent e) { startNewGame(); }
+    @FXML public void handlePauseButton(ActionEvent e) { togglePause(); }
+    @FXML public void handleMainMenuButton(ActionEvent e) {
         try {
             gameLoopManager.gameOver();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mainMenu.fxml"));
