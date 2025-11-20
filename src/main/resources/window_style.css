@@ -1,4 +1,5 @@
 .root {
+
     -fx-background-image: url("backgroundImage.jpg");
      -fx-background-repeat: no-repeat;
      -fx-background-size: cover;
@@ -20,8 +21,6 @@
     -fx-border-insets: -3px;
     -fx-background-insets: 0;
     -fx-padding: 5;
-    -fx-hgap: 1;
-    -fx-vgap: 1;
     -fx-effect: dropshadow(gaussian, #d500f9, 25, 0.6, 0, 0);
 }
 

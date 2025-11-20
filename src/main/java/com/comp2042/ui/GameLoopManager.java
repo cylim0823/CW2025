@@ -18,6 +18,7 @@ public class GameLoopManager {
     private final BooleanProperty isGameOver = new SimpleBooleanProperty(false);
     private final BooleanProperty isCountingDown = new SimpleBooleanProperty(false);
     private Timeline timeLine;
+    private Timeline countdownTimeline;
     private long currentSpeedMillis;
     private final Runnable onTickAction;
     private final Label countdownLabel;
@@ -67,6 +68,7 @@ public class GameLoopManager {
 
     public void newGame() {
         if (timeLine != null) timeLine.stop();
+        if (countdownTimeline != null) countdownTimeline.stop();
 
         isPause.setValue(Boolean.FALSE);
         isGameOver.setValue(Boolean.FALSE);
@@ -116,7 +118,7 @@ public class GameLoopManager {
         countdownLabel.setVisible(true);
         countdownLabel.toFront();
 
-        Timeline countdownTimeline = new Timeline(
+        countdownTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(1), e -> countdown.set(countdown.get() - 1))
         );
         countdownTimeline.setCycleCount(3);

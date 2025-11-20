@@ -23,7 +23,7 @@
                             <Label styleClass="scoreClass" text="HOLD" />
                             <BorderPane maxHeight="129.0" maxWidth="129.0" minHeight="129.0" minWidth="129.0" prefHeight="129.0" prefWidth="129.0" styleClass="holdBrick">
                                 <center>
-                                    <GridPane fx:id="holdBrickPanel" hgap="1" vgap="1" alignment="CENTER" />
+                                    <GridPane fx:id="holdBrickPanel" alignment="CENTER" hgap="1" vgap="1" />
                                 </center>
                             </BorderPane>
                         </children>
@@ -34,8 +34,8 @@
                             <Button fx:id="pauseButton" onAction="#handlePauseButton" prefWidth="120.0" text="PAUSE" />
                             <Button fx:id="newGameBtn" onAction="#handleNewGameButton" prefWidth="120.0" text="RESTART" />
                             <Button fx:id="mainMenuButton" onAction="#handleMainMenuButton" prefWidth="120.0" text="MAIN MENU" />
-                            <Label fx:id="scoreLabel" prefWidth="200.0" styleClass="scoreClass" text="Score: 0" alignment="CENTER" />
-                            <Label fx:id="levelLabel" prefWidth="200.0" styleClass="scoreClass" text="Level: 1" alignment="CENTER" />
+                            <Label fx:id="scoreLabel" alignment="CENTER" prefWidth="200.0" styleClass="scoreClass" text="Score: 0" />
+                            <Label fx:id="levelLabel" alignment="CENTER" prefWidth="200.0" styleClass="scoreClass" text="Level: 1" />
                         </children>
                         <padding>
                             <Insets top="20.0" />
@@ -47,12 +47,12 @@
                 </padding>
             </VBox>
 
-            <BorderPane fx:id="gameBoard" maxHeight="519.0" maxWidth="259.0" minHeight="519.0" minWidth="259.0" prefHeight="519.0" prefWidth="259.0" style="-fx-padding:0;" styleClass="gameBoard">
+            <BorderPane fx:id="gameBoard" maxHeight="500.0" maxWidth="250.0" minHeight="500.0" minWidth="250.0" prefHeight="500.0" prefWidth="250.0" style="-fx-padding:0;" styleClass="gameBoard">
                 <center>
-                    <StackPane alignment="TOP_LEFT" maxHeight="519.0" maxWidth="259.0" minHeight="519.0" minWidth="259.0" prefHeight="519.0" prefWidth="259.0">
+                    <StackPane maxHeight="500.0" maxWidth="250.0" minHeight="500.0" minWidth="250.0" prefHeight="500.0" prefWidth="250.0">
                         <children>
-                            <GridPane fx:id="gamePanel" hgap="1.0" maxHeight="519.0" maxWidth="259.0" minHeight="519.0" minWidth="259.0" prefHeight="519.0" prefWidth="259.0" vgap="1.0" />
-                            <GridPane fx:id="brickPanel" hgap="1.0" maxHeight="519.0" maxWidth="259.0" minHeight="519.0" minWidth="259.0" prefHeight="519.0" prefWidth="259.0" vgap="1.0" />
+                            <GridPane fx:id="gamePanel" maxHeight="500.0" maxWidth="250.0" minHeight="500.0" minWidth="250.0" prefHeight="500.0" prefWidth="250.0" />
+                            <GridPane fx:id="brickPanel" maxHeight="500.0" maxWidth="250.0" minHeight="500.0" minWidth="250.0" prefHeight="500.0" prefWidth="250.0" />
                         </children>
                     </StackPane>
                 </center>
@@ -62,7 +62,7 @@
                 <VBox alignment="CENTER" spacing="5">
                     <children>
                         <Label styleClass="scoreClass" text="NEXT" />
-                        <VBox fx:id="nextBricksContainer" alignment="CENTER" spacing="0" styleClass="nextBrick" maxWidth="150.0" minWidth="150.0">
+                        <VBox fx:id="nextBricksContainer" alignment="CENTER" maxWidth="150.0" minWidth="150.0" spacing="0" styleClass="nextBrick">
                             <padding>
                                 <Insets bottom="10" left="10" right="10" top="10" />
                             </padding>
