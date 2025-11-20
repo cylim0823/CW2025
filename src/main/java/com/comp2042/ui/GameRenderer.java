@@ -18,6 +18,7 @@ public class GameRenderer {
     private final GridPane gamePanel;
     private final VBox nextBricksContainer;
     private final GridPane holdBrickPanel;
+    private final ColorManager colorManager;
 
     // For drawing
     private Rectangle[][] displayMatrix;
@@ -26,10 +27,11 @@ public class GameRenderer {
     private List<Rectangle[][]> nextBrickRectangleList;
     private Rectangle[][] holdBrickRectangles;
 
-    public GameRenderer(GridPane gamePanel, VBox nextBricksContainer, GridPane holdBrickPanel){
+    public GameRenderer(GridPane gamePanel, VBox nextBricksContainer, GridPane holdBrickPanel, ColorManager colorManager){
         this.gamePanel = gamePanel;
         this.nextBricksContainer = nextBricksContainer;
         this.holdBrickPanel = holdBrickPanel;
+        this.colorManager = colorManager;
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
@@ -130,7 +132,7 @@ public class GameRenderer {
                     int x = brick.getxPosition() + j;
                     int y = brick.getGhostYPosition() + i;
                     if (y >= HIDDEN_ROWS && y < ghostRectangles.length && x >= 0 && x < ghostRectangles[0].length) {
-                        ghostRectangles[y][x].setFill(getGhostFillColor(brickData[i][j]));
+                        ghostRectangles[y][x].setFill(colorManager.getGhostPaint(brickData[i][j]));
                         ghostRectangles[y][x].setVisible(true); // Show it
                     }
                 }
@@ -144,7 +146,7 @@ public class GameRenderer {
                     int x = brick.getxPosition() + j;
                     int y = brick.getyPosition() + i;
                     if (y >= HIDDEN_ROWS && y < activeRectangles.length && x >= 0 && x < activeRectangles[0].length) {
-                        activeRectangles[y][x].setFill(getFillColor(brickData[i][j]));
+                        activeRectangles[y][x].setFill(colorManager.getPaint(brickData[i][j]));
                         activeRectangles[y][x].setStroke(Color.BLACK);
                     }
                 }
@@ -165,7 +167,7 @@ public class GameRenderer {
                 int[][] data = dataList.get(panelIndex);
                 for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
-                        currentPanelRects[i][j].setFill(getFillColor(data[i][j]));
+                        currentPanelRects[i][j].setFill(colorManager.getPaint(data[i][j]));
                         if(data[i][j] != 0) currentPanelRects[i][j].setStroke(Color.BLACK);
                         else currentPanelRects[i][j].setStroke(Color.TRANSPARENT);
                     }
@@ -186,7 +188,7 @@ public class GameRenderer {
             int[][] data = brick.getHoldBrickData();
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
-                    holdBrickRectangles[i][j].setFill(getFillColor(data[i][j]));
+                    holdBrickRectangles[i][j].setFill(colorManager.getPaint(data[i][j]));
                     if(data[i][j] != 0) holdBrickRectangles[i][j].setStroke(Color.BLACK);
                     else holdBrickRectangles[i][j].setStroke(Color.TRANSPARENT);
                 }
@@ -201,32 +203,6 @@ public class GameRenderer {
         }
     }
 
-
-    private Paint getFillColor(int i) {
-        Paint returnPaint;
-        switch (i) {
-            case 0: returnPaint = Color.BLACK; break;
-            case 1: returnPaint = Color.AQUA; break;
-            case 2: returnPaint = Color.BLUEVIOLET; break;
-            case 3: returnPaint = Color.DARKGREEN; break;
-            case 4: returnPaint = Color.YELLOW; break;
-            case 5: returnPaint = Color.RED; break;
-            case 6: returnPaint = Color.BEIGE; break;
-            case 7: returnPaint = Color.BURLYWOOD; break;
-            default: returnPaint = Color.WHITE; break;
-        }
-        return returnPaint;
-    }
-
-    private Paint getGhostFillColor(int i) {
-        Paint returnPaint = getFillColor(i);
-        if (returnPaint instanceof Color) {
-            Color color = (Color) returnPaint;
-            return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.5);
-        }
-        return returnPaint;
-    }
-
     public void refreshGameBackground(int[][] board) {
         for (int i = HIDDEN_ROWS; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
@@ -236,6 +212,6 @@ public class GameRenderer {
     }
 
     private void setRectangleData(int color, Rectangle rectangle) {
-        rectangle.setFill(getFillColor(color));
+        rectangle.setFill(colorManager.getPaint(color));
     }
 }

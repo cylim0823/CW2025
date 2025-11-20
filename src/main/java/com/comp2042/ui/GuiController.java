@@ -46,7 +46,8 @@ public class GuiController implements Initializable, GameObserver {
         loadCustomFont();
         rootPane.requestFocus();
 
-        this.gameRenderer = new GameRenderer(gamePanel, nextBricksContainer, holdBrickPanel);
+        ColorManager colorManager = new ColorManager();
+        this.gameRenderer = new GameRenderer(gamePanel, nextBricksContainer, holdBrickPanel, colorManager);
         this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel);
         this.keyManager = new KeyManager(this, gameLoopManager);
         GameController logic = new GameController();
