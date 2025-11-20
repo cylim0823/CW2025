@@ -7,12 +7,24 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.scene.Group;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import java.util.List;
 
 public class GameLoopManager {
+
+    private static final List<Long> LEVEL_SPEEDS = List.of(
+            400L, // Level 1
+            360L, // Level 2
+            320L, // Level 3
+            280L, // Level 4
+            240L, // Level 5
+            200L, // Level 6
+            160L, // Level 7
+            120L, // Level 8
+            100L, // Level 9
+            80L   // Level 10+ (Max Speed)
+    );
 
     private final BooleanProperty isPause = new SimpleBooleanProperty(false);
     private final BooleanProperty isGameOver = new SimpleBooleanProperty(false);
@@ -29,7 +41,7 @@ public class GameLoopManager {
     }
 
     public void initGameLoop() {
-        this.currentSpeedMillis = 400; // Default level 1 speed
+        this.currentSpeedMillis = LEVEL_SPEEDS.get(0); // Default Level 1 speed
         this.timeLine = createTimeline(this.currentSpeedMillis);
     }
 
@@ -78,19 +90,12 @@ public class GameLoopManager {
     }
 
     public void updateLevel(int level) {
-        long newSpeed;
-        switch (level) {
-            case 1: newSpeed = 400; break;
-            case 2: newSpeed = 360; break;
-            case 3: newSpeed = 320; break;
-            case 4: newSpeed = 280; break;
-            case 5: newSpeed = 240; break;
-            case 6: newSpeed = 200; break;
-            case 7: newSpeed = 160; break;
-            case 8: newSpeed = 120; break;
-            case 9: newSpeed = 100; break;
-            default: newSpeed = 80; break;
-        }
+        int index = level - 1;
+
+        if (index < 0) index = 0;
+        if (index >= LEVEL_SPEEDS.size()) index = LEVEL_SPEEDS.size() - 1;
+
+        long newSpeed = LEVEL_SPEEDS.get(index);
 
         if (this.currentSpeedMillis == newSpeed || timeLine == null) {
             return;
@@ -99,7 +104,6 @@ public class GameLoopManager {
         this.currentSpeedMillis = newSpeed;
         Timeline.Status oldStatus = timeLine.getStatus();
         timeLine.stop();
-
         this.timeLine = createTimeline(newSpeed);
 
         if (oldStatus == Timeline.Status.RUNNING && !isPause.get()) {
