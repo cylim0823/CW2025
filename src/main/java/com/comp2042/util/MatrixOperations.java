@@ -10,11 +10,6 @@ import java.util.stream.Collectors;
 
 public class MatrixOperations {
 
-
-    private MatrixOperations(){
-
-    }
-
     public static boolean intersect(final int[][] matrix, final int[][] brick, int x, int y) {
         for (int i = 0; i < brick.length; i++) {
             for (int j = 0; j < brick[i].length; j++) {

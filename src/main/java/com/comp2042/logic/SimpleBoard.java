@@ -198,11 +198,6 @@ public class SimpleBoard implements Board {
     }
 
     @Override
-    public Score getScore() {
-        return score;
-    }
-
-    @Override
     public int hardDrop() {
         int rowsDropped = 0;
         while (moveBrickDown()) {

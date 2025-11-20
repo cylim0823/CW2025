@@ -6,7 +6,5 @@ public interface BrickGenerator {
 
     Brick getBrick();
 
-    Brick getNextBrick();
-
     List<Brick> getUpcomingBricks();
 }

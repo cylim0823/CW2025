@@ -47,12 +47,6 @@ public class RandomBrickGenerator implements BrickGenerator {
     }
 
     @Override
-    public Brick getNextBrick() {
-        fillQueue();
-        return nextBricks.peek();
-    }
-
-    @Override
     public List<Brick> getUpcomingBricks() {
         fillQueue();
         return new ArrayList<>(nextBricks);

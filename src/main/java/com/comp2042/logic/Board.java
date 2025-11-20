@@ -24,8 +24,6 @@ public interface Board {
 
     ClearRow clearRows();
 
-    Score getScore();
-
     void newGame();
 
     int hardDrop();

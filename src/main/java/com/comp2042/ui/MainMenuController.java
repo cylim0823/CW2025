@@ -1,6 +1,5 @@
 package com.comp2042.ui;
 
-import com.comp2042.logic.GameController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

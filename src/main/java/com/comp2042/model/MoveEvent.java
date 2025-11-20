@@ -9,10 +9,6 @@ public final class MoveEvent {
         this.eventSource = eventSource;
     }
 
-    public EventType getEventType() {
-        return eventType;
-    }
-
     public EventSource getEventSource() {
         return eventSource;
     }
