@@ -38,7 +38,6 @@ public class GuiController implements Initializable, GameObserver {
     private GameLoopManager gameLoopManager;
     private KeyManager keyManager;
 
-    // The logic interface we talk to GameController
     private InputEventListener eventListener;
 
     @Override
@@ -52,7 +51,8 @@ public class GuiController implements Initializable, GameObserver {
         this.keyManager = new KeyManager(this, gameLoopManager);
         GameController logic = new GameController();
 
-        gameRenderer.initGameView(logic.getBoard(), logic.getViewData());
+        gameRenderer.initGameView(logic.getBoard());
+
         gameLoopManager.initGameLoop();
         logic.addObserver(this);
 
@@ -62,7 +62,7 @@ public class GuiController implements Initializable, GameObserver {
         resetUIState();
     }
 
-    // Observer methods (Automatic updates from logic)
+    // Observer methods
 
     @Override
     public void onBoardUpdated(ViewData viewData) {
@@ -113,7 +113,6 @@ public class GuiController implements Initializable, GameObserver {
 
     public void startNewGame() {
         eventListener.createNewGame();
-
         resetUIState();
         rootPane.requestFocus();
         gameLoopManager.newGame();
@@ -154,17 +153,34 @@ public class GuiController implements Initializable, GameObserver {
     }
 
     // Button handlers
-    @FXML public void handleNewGameButton(ActionEvent e) { startNewGame(); }
-    @FXML public void handlePauseButton(ActionEvent e) { togglePause(); }
-    @FXML public void handleMainMenuButton(ActionEvent e) {
+
+    @FXML
+    public void handleNewGameButton() {
+        startNewGame();
+    }
+
+    @FXML
+    public void handlePauseButton() {
+        togglePause();
+    }
+
+    @FXML
+    public void handleMainMenuButton() {
+        gameLoopManager.gameOver();
+        loadScene("mainMenu.fxml");
+    }
+
+    private void loadScene(String fxmlFile) {
         try {
-            gameLoopManager.gameOver();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("mainMenu.fxml"));
-            Parent mainMenuRoot = fxmlLoader.load();
+            URL url = getClass().getClassLoader().getResource(fxmlFile);
+            if (url == null) throw new IOException("File not found: " + fxmlFile);
+
+            FXMLLoader fxmlLoader = new FXMLLoader(url);
+            Parent root = fxmlLoader.load();
             Scene currentScene = rootPane.getScene();
-            currentScene.setRoot(mainMenuRoot);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+            currentScene.setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -5,6 +5,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class GameRenderer {
         this.colorManager = colorManager;
     }
 
-    public void initGameView(int[][] boardMatrix, ViewData brick) {
+    public void initGameView(int[][] boardMatrix) {
 
         holdBrickPanel.getStyleClass().clear();
         holdBrickPanel.getStyleClass().add("holdBrick");
@@ -48,9 +49,9 @@ public class GameRenderer {
                 // Grid
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 rectangle.setFill(Color.BLACK);
-                // Grid Lines
                 rectangle.setStroke(Color.web("#2b2b2b"));
                 rectangle.setStrokeWidth(1);
+                rectangle.setStrokeType(StrokeType.INSIDE);
                 displayMatrix[i][j] = rectangle;
                 gamePanel.add(rectangle, j, i - HIDDEN_ROWS);
 
@@ -59,7 +60,8 @@ public class GameRenderer {
                 ghostRectangle.setFill(Color.TRANSPARENT);
                 ghostRectangle.setStroke(Color.BLACK);
                 ghostRectangle.setStrokeWidth(1);
-                ghostRectangle.setVisible(false); // Hide by default
+                ghostRectangle.setStrokeType(StrokeType.INSIDE);
+                ghostRectangle.setVisible(false);
                 ghostRectangles[i][j] = ghostRectangle;
                 gamePanel.add(ghostRectangle, j, i - HIDDEN_ROWS);
 
@@ -67,6 +69,7 @@ public class GameRenderer {
                 Rectangle activeRectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 activeRectangle.setFill(Color.TRANSPARENT);
                 activeRectangle.setStrokeWidth(1);
+                activeRectangle.setStrokeType(StrokeType.INSIDE);
                 activeRectangles[i][j] = activeRectangle;
                 gamePanel.add(activeRectangle, j, i - HIDDEN_ROWS);
             }
@@ -85,9 +88,9 @@ public class GameRenderer {
                 for (int j = 0; j < 4; j++) {
                     Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                     rectangle.setFill(Color.TRANSPARENT);
-                    // Add border to preview pieces
                     rectangle.setStroke(Color.BLACK);
                     rectangle.setStrokeWidth(1);
+                    rectangle.setStrokeType(StrokeType.INSIDE);
                     previewRectangles[i][j] = rectangle;
                     previewPanel.add(rectangle, j, i);
                 }
@@ -102,9 +105,9 @@ public class GameRenderer {
             for (int j = 0; j < 4; j++) {
                 Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
                 rectangle.setFill(Color.TRANSPARENT);
-                // Add border to hold piece
                 rectangle.setStroke(Color.BLACK);
                 rectangle.setStrokeWidth(1);
+                rectangle.setStrokeType(StrokeType.INSIDE);
                 holdBrickRectangles[i][j] = rectangle;
                 holdBrickPanel.add(rectangle, j, i);
             }
@@ -114,11 +117,9 @@ public class GameRenderer {
     public void refreshBrick(ViewData brick) {
         for (int i = HIDDEN_ROWS; i < ghostRectangles.length; i++) {
             for (int j = 0; j < ghostRectangles[i].length; j++) {
-                // Hide ghost
                 ghostRectangles[i][j].setVisible(false);
-
-                activeRectangles[i][j].setFill(Color.TRANSPARENT); // Clear active piece
-                activeRectangles[i][j].setStroke(Color.TRANSPARENT); // Clear the border
+                activeRectangles[i][j].setFill(Color.TRANSPARENT);
+                activeRectangles[i][j].setStroke(Color.TRANSPARENT);
             }
         }
 
@@ -132,7 +133,7 @@ public class GameRenderer {
                     int y = brick.getGhostYPosition() + i;
                     if (y >= HIDDEN_ROWS && y < ghostRectangles.length && x >= 0 && x < ghostRectangles[0].length) {
                         ghostRectangles[y][x].setFill(colorManager.getGhostPaint(brickData[i][j]));
-                        ghostRectangles[y][x].setVisible(true); // Show it
+                        ghostRectangles[y][x].setVisible(true);
                     }
                 }
             }

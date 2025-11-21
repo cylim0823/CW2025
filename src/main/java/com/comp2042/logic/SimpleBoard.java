@@ -5,7 +5,6 @@ import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;
 import com.comp2042.model.ClearRow;
 import com.comp2042.model.NextShapeInfo;
-import com.comp2042.model.Score;
 import com.comp2042.model.ViewData;
 import com.comp2042.util.MatrixOperations;
 
@@ -21,7 +20,6 @@ public class SimpleBoard implements Board {
     private final BrickRotator brickRotator;
     private int[][] currentGameMatrix;
     private Point currentOffset;
-    private final Score score;
     private Brick heldBrick;
     private boolean canHold;
 
@@ -31,7 +29,6 @@ public class SimpleBoard implements Board {
         currentGameMatrix = new int[height][width];
         brickGenerator = new RandomBrickGenerator();
         brickRotator = new BrickRotator();
-        score = new Score();
         this.heldBrick = null;
         this.canHold = true;
     }
@@ -49,7 +46,7 @@ public class SimpleBoard implements Board {
             Brick currentBrick = brickRotator.getBrick();
             brickRotator.setBrick(heldBrick);
             heldBrick = currentBrick;
-            currentOffset = new Point(4, 0);
+            currentOffset = new Point(getStartX(), 0);
 
             // Instead of calling newGame(), set the game-over flag.
             if (MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY())) {
@@ -66,14 +63,17 @@ public class SimpleBoard implements Board {
         this.canHold = true;
         Brick currentBrick = brickGenerator.getBrick();
         brickRotator.setBrick(currentBrick);
-        currentOffset = new Point(4, 0);
+        currentOffset = new Point(getStartX(), 0);
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
+    }
+
+    private int getStartX() {
+        return width / 2 - 2;
     }
 
     @Override
     public void newGame() {
         currentGameMatrix = new int[height][width];
-        score.reset();
         heldBrick = null;
         canHold = true;
         createNewBrick();

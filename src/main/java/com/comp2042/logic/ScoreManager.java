@@ -6,6 +6,9 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 public class ScoreManager {
 
+    private static final int SCORE_PER_LINE = 50;
+    private static final int LINES_PER_LEVEL_UP = 10;
+
     private int totalLinesCleared = 0;
     private final IntegerProperty currentLevel = new SimpleIntegerProperty(1);
     private final Score score = new Score();
@@ -32,11 +35,11 @@ public class ScoreManager {
 
     public int onRowsCleared(int linesRemoved){
         if (linesRemoved > 0){
-            int scoreBonus = 50 * linesRemoved * linesRemoved;
+            int scoreBonus = SCORE_PER_LINE * linesRemoved * linesRemoved;
             score.add(scoreBonus);
 
             totalLinesCleared += linesRemoved;
-            while (totalLinesCleared >= currentLevel.get() * 10){
+            while (totalLinesCleared >= currentLevel.get() * LINES_PER_LEVEL_UP){
                 currentLevel.set(currentLevel.get() + 1);
             }
             return scoreBonus;

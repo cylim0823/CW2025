@@ -46,15 +46,15 @@ public class KeyManager {
             switch (code) {
                 case LEFT:
                 case A:
-                    eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER));
+                    eventListener.onLeftEvent();
                     break;
                 case RIGHT:
                 case D:
-                    eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER));
+                    eventListener.onRightEvent();
                     break;
                 case UP:
                 case W:
-                    eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER));
+                    eventListener.onRotateEvent();
                     break;
                 case DOWN:
                 case S:

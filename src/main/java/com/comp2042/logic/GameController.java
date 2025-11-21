@@ -6,12 +6,15 @@ import java.util.List;
 
 public class GameController implements InputEventListener {
 
+    private static final int GAME_HEIGHT = 24;
+    private static final int GAME_WIDTH = 10;
+
     private final Board board;
     private final ScoreManager scoreManager;
     private final List<GameObserver> observers = new ArrayList<>();
 
     public GameController() {
-        this.board = new SimpleBoard(24, 10);
+        this.board = new SimpleBoard(GAME_HEIGHT, GAME_WIDTH);
         this.scoreManager = new ScoreManager();
         this.board.createNewBrick();
 
@@ -79,7 +82,7 @@ public class GameController implements InputEventListener {
         scoreManager.onRowsCleared(linesCleared);
 
         if (linesCleared > 0) {
-            String message = "";
+            String message;
             switch (linesCleared) {
                 case 1: message = "SINGLE"; break;
                 case 2: message = "DOUBLE"; break;
@@ -89,17 +92,15 @@ public class GameController implements InputEventListener {
             notifyLineClear(message);
         }
 
-        notifyBackground(); // The pile changed, redraw it.
+        notifyBackground();
 
         boolean isGameOver = board.createNewBrick();
         if (isGameOver) {
             notifyGameOver();
         } else {
-            notifyBoard(); // Show the new active piece
+            notifyBoard();
         }
     }
-
-    // Input events
 
     @Override
     public void onDownEvent(MoveEvent event) {
@@ -111,7 +112,7 @@ public class GameController implements InputEventListener {
             if (event.getEventSource() == EventSource.USER) {
                 scoreManager.onSoftDrop();
             }
-            notifyBoard(); // Piece moved, tell UI to update
+            notifyBoard();
         }
     }
 
@@ -133,39 +134,33 @@ public class GameController implements InputEventListener {
     }
 
     @Override
-    public void onLeftEvent(MoveEvent event) {
+    public void onLeftEvent() {
         board.moveBrickLeft();
         notifyBoard();
     }
 
     @Override
-    public void onRightEvent(MoveEvent event) {
+    public void onRightEvent() {
         board.moveBrickRight();
         notifyBoard();
     }
 
     @Override
-    public void onRotateEvent(MoveEvent event) {
+    public void onRotateEvent() {
         board.rotateLeftBrick();
         notifyBoard();
     }
 
     @Override
-    public ViewData createNewGame() {
+    public void createNewGame() {
         board.newGame();
         scoreManager.reset();
         notifyBackground();
         notifyBoard();
-        return board.getViewData();
     }
 
     @Override
     public int[][] getBoard() {
         return board.getBoardMatrix();
-    }
-
-    @Override
-    public ViewData getViewData() {
-        return board.getViewData();
     }
 }
