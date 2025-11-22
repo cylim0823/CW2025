@@ -34,6 +34,7 @@ public class GuiController implements Initializable, GameObserver {
     @FXML private VBox pausePane;
     @FXML private VBox gameOverPane;
 
+    private SoundManager soundManager;
     private GameRenderer gameRenderer;
     private GameLoopManager gameLoopManager;
     private KeyManager keyManager;
@@ -46,10 +47,14 @@ public class GuiController implements Initializable, GameObserver {
         rootPane.requestFocus();
 
         ColorManager colorManager = new ColorManager();
+        this.soundManager = new SoundManager();
         this.gameRenderer = new GameRenderer(gamePanel, nextBricksContainer, holdBrickPanel, colorManager);
         this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel);
         this.keyManager = new KeyManager(this, gameLoopManager);
         GameController logic = new GameController();
+
+        logic.addObserver(soundManager);
+        soundManager.playMusic();
 
         gameRenderer.initGameView(logic.getBoard());
 
@@ -86,7 +91,7 @@ public class GuiController implements Initializable, GameObserver {
     }
 
     @Override
-    public void onLineCleared(String message) {
+    public void onLineCleared(int lines, String message) {
         Platform.runLater(() -> showLineClearNotification(message));
     }
 
@@ -97,6 +102,10 @@ public class GuiController implements Initializable, GameObserver {
             gameOverPane.setVisible(true);
             gameOverPane.toFront();
         });
+    }
+
+    @Override
+    public void onBrickDropped() {
     }
 
     // Helper methods
@@ -116,6 +125,10 @@ public class GuiController implements Initializable, GameObserver {
         resetUIState();
         rootPane.requestFocus();
         gameLoopManager.newGame();
+
+        if (soundManager != null) {
+            soundManager.playMusic();
+        }
     }
 
     public void togglePause() {
@@ -124,6 +137,12 @@ public class GuiController implements Initializable, GameObserver {
         pausePane.setVisible(isPaused);
         if(isPaused) pausePane.toFront();
         rootPane.requestFocus();
+    }
+
+    public void toggleMute(){
+        if (soundManager != null){
+            soundManager.toggleMute();
+        }
     }
 
     public void setEventListener(InputEventListener eventListener) {
@@ -167,6 +186,11 @@ public class GuiController implements Initializable, GameObserver {
     @FXML
     public void handleMainMenuButton() {
         gameLoopManager.gameOver();
+
+        if (soundManager != null){
+            soundManager.stopMusic();
+        }
+
         loadScene("mainMenu.fxml");
     }
 

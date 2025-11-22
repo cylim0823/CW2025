@@ -29,6 +29,12 @@ public class KeyManager {
             return;
         }
 
+        if (code == KeyCode.M){
+            guiController.toggleMute();
+            keyEvent.consume();
+            return;
+        }
+
         if (gameLoopManager.isCountingDownProperty().get()) {
             keyEvent.consume();
             return;

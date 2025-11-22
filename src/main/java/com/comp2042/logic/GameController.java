@@ -66,9 +66,15 @@ public class GameController implements InputEventListener {
         }
     }
 
-    private void notifyLineClear(String message) {
+    private void notifyBrickDropped() {
         for (GameObserver o : observers) {
-            o.onLineCleared(message);
+            o.onBrickDropped();
+        }
+    }
+
+    private void notifyLineClear(int lines, String message) {
+        for (GameObserver o : observers) {
+            o.onLineCleared(lines, message);
         }
     }
 
@@ -89,7 +95,7 @@ public class GameController implements InputEventListener {
                 case 3: message = "TRIPLE"; break;
                 case 4: default: message = "TETRIS!"; break;
             }
-            notifyLineClear(message);
+            notifyLineClear(linesCleared, message);
         }
 
         notifyBackground();
@@ -111,6 +117,7 @@ public class GameController implements InputEventListener {
         } else {
             if (event.getEventSource() == EventSource.USER) {
                 scoreManager.onSoftDrop();
+                notifyBrickDropped();  // Play sound
             }
             notifyBoard();
         }
@@ -120,6 +127,7 @@ public class GameController implements InputEventListener {
     public void onHardDropEvent(MoveEvent event) {
         int rowsDropped = board.hardDrop();
         scoreManager.onHardDrop(rowsDropped);
+        notifyBrickDropped();
         handlePieceLanded();
     }
 

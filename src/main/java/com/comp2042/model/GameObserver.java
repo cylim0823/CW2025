@@ -29,10 +29,12 @@ public interface GameObserver {
      * Called when rows are cleared (Single, Double, Tetris!).
      * @param message The notification text to display.
      */
-    void onLineCleared(String message);
+    void onLineCleared(int Lines, String message);
 
     /**
      * Called when the game ends.
      */
     void onGameOver();
+
+    void onBrickDropped();
 }
