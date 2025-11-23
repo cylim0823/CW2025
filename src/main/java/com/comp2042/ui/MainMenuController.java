@@ -1,18 +1,47 @@
 package com.comp2042.ui;
 
+import com.comp2042.logic.ScoreManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.text.Font;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class MainMenuController {
+public class MainMenuController implements Initializable {
+
+    private static final String FONT_PATH = "/digital.ttf";
+    private static final double FONT_SIZE = 38;
+
+    @FXML private Label highScoreLabel;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        loadCustomFont();
+
+        ScoreManager sm = new ScoreManager();
+
+        if (highScoreLabel != null) {
+            // REFACTOR: Changed getHighScore() to getHighestScore()
+            highScoreLabel.setText("Highest Score: " + sm.getHighestScore());
+        }
+    }
+
+    private void loadCustomFont() {
+        try {
+            Font.loadFont(getClass().getResourceAsStream(FONT_PATH), FONT_SIZE);
+        } catch (Exception e) {
+            System.err.println("Could not load font: " + FONT_PATH);
+        }
+    }
 
     /**
      * This method is called when the "Start Game" button is clicked.

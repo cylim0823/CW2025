@@ -61,6 +61,8 @@ public class GameController implements InputEventListener {
     }
 
     private void notifyGameOver() {
+        scoreManager.checkAndSaveHighestScore();
+
         for (GameObserver o : observers) {
             o.onGameOver();
         }

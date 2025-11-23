@@ -2,9 +2,9 @@ package com.comp2042.ui;
 
 import com.comp2042.logic.GameController;
 import com.comp2042.logic.InputEventListener;
+import com.comp2042.logic.ScoreManager;
 import com.comp2042.model.*;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -34,12 +34,17 @@ public class GuiController implements Initializable, GameObserver {
     @FXML private VBox pausePane;
     @FXML private VBox gameOverPane;
 
+    // High Score Labels
+    @FXML private Label gameOverScoreLabel;
+    @FXML private Label currentScoreLabel;
+
     private SoundManager soundManager;
     private GameRenderer gameRenderer;
     private GameLoopManager gameLoopManager;
     private KeyManager keyManager;
 
     private InputEventListener eventListener;
+    private int currentScore = 0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -81,6 +86,7 @@ public class GuiController implements Initializable, GameObserver {
 
     @Override
     public void onScoreUpdated(int score) {
+        this.currentScore = score;
         Platform.runLater(() -> scoreLabel.setText("Score: " + score));
     }
 
@@ -96,16 +102,27 @@ public class GuiController implements Initializable, GameObserver {
     }
 
     @Override
+    public void onBrickDropped() {}
+
+    @Override
     public void onGameOver() {
         Platform.runLater(() -> {
             gameLoopManager.gameOver();
+            if (soundManager != null) soundManager.onGameOver();
+
+            ScoreManager sm = new ScoreManager();
+            int bestScore = sm.getHighestScore();
+
+            if (gameOverScoreLabel != null) {
+                gameOverScoreLabel.setText("Highest Score: " + bestScore);
+            }
+            if (currentScoreLabel != null) {
+                currentScoreLabel.setText("Your Score: " + currentScore);
+            }
+
             gameOverPane.setVisible(true);
             gameOverPane.toFront();
         });
-    }
-
-    @Override
-    public void onBrickDropped() {
     }
 
     // Helper methods
@@ -186,11 +203,9 @@ public class GuiController implements Initializable, GameObserver {
     @FXML
     public void handleMainMenuButton() {
         gameLoopManager.gameOver();
-
         if (soundManager != null){
             soundManager.stopMusic();
         }
-
         loadScene("mainMenu.fxml");
     }
 

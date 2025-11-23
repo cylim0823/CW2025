@@ -3,53 +3,89 @@ package com.comp2042.logic;
 import com.comp2042.model.Score;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
 
 public class ScoreManager {
 
     private static final int SCORE_PER_LINE = 50;
     private static final int LINES_PER_LEVEL_UP = 10;
+    private static final String HIGHEST_SCORE_FILE = "highest_score.txt"; // Renamed file too
 
     private int totalLinesCleared = 0;
     private final IntegerProperty currentLevel = new SimpleIntegerProperty(1);
     private final Score score = new Score();
+    private int highestScore = 0;
 
     // Constructor
     public ScoreManager() {
-
+        loadHighestScore();
     }
 
-    // Getters
-    public IntegerProperty scoreProperty(){
-        return score.scoreProperty();
+    private void loadHighestScore() {
+        try {
+            File file = new File(HIGHEST_SCORE_FILE);
+            if (file.exists()) {
+                Scanner scanner = new Scanner(file);
+                if (scanner.hasNextInt()) {
+                    highestScore = scanner.nextInt();
+                }
+                scanner.close();
+            }
+        } catch (Exception e) {
+            System.err.println("Could not load highest score.");
+        }
     }
 
-    public IntegerProperty levelProperty(){
-        return currentLevel;
+    private void saveHighestScore() {
+        try {
+            FileWriter writer = new FileWriter(HIGHEST_SCORE_FILE);
+            writer.write(String.valueOf(highestScore));
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("Could not save highest score.");
+        }
     }
+
+    public boolean checkAndSaveHighestScore() {
+        int current = score.scoreProperty().get();
+        if (current > highestScore) {
+            highestScore = current;
+            saveHighestScore();
+            return true;
+        }
+        return false;
+    }
+
+    public int getHighestScore() {
+        return highestScore;
+    }
+
+    public IntegerProperty scoreProperty(){ return score.scoreProperty(); }
+    public IntegerProperty levelProperty(){ return currentLevel; }
 
     public void reset(){
         totalLinesCleared = 0;
         currentLevel.set(1);
         score.reset();
+        loadHighestScore();
     }
 
-    public int onRowsCleared(int linesRemoved){
+    public void onRowsCleared(int linesRemoved){
         if (linesRemoved > 0){
             int scoreBonus = SCORE_PER_LINE * linesRemoved * linesRemoved;
             score.add(scoreBonus);
-
             totalLinesCleared += linesRemoved;
             while (totalLinesCleared >= currentLevel.get() * LINES_PER_LEVEL_UP){
                 currentLevel.set(currentLevel.get() + 1);
             }
-            return scoreBonus;
         }
-        return 0;
     }
 
     public void onHardDrop(int rowsDropped){
-        int scoreBonus = rowsDropped * 1;
-        score.add(scoreBonus);
+        score.add(rowsDropped);
     }
 
     public void onSoftDrop(){

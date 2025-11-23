@@ -17,6 +17,8 @@
     <children>
         <Label styleClass="mainTitle" text="TETRIS" />
 
+        <Label fx:id="highScoreLabel" styleClass="scoreClass" text="Highest Score: 0" />
+
         <Button fx:id="startButton" onAction="#handleStartButton" prefWidth="200" prefHeight="50" text="START GAME" />
         <Button fx:id="exitButton" onAction="#handleExitButton" prefWidth="200" prefHeight="50" text="EXIT" />
     </children>
