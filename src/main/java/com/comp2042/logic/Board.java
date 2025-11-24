@@ -29,4 +29,8 @@ public interface Board {
     int hardDrop();
 
     boolean holdCurrentBrick();
+
+    void restoreState(int[][] savedGrid);
+
+    void resetCurrentBrick();
 }

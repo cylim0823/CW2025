@@ -34,6 +34,19 @@ public class SimpleBoard implements Board {
     }
 
     @Override
+    public void restoreState(int[][] savedGrid) {
+        for (int i = 0; i < height; i++) {
+            System.arraycopy(savedGrid[i], 0, currentGameMatrix[i], 0, width);
+        }
+    }
+
+    @Override
+    public void resetCurrentBrick() {
+        this.currentOffset = new Point(getStartX(), 0);
+        brickRotator.setBrick(brickRotator.getBrick());
+    }
+
+    @Override
     public boolean holdCurrentBrick() {
         if (!canHold) {
             return false;
@@ -104,7 +117,6 @@ public class SimpleBoard implements Board {
     public boolean moveBrickDown() {
         return tryMove(0, 1);
     }
-
 
     @Override
     public boolean moveBrickLeft() {

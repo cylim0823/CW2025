@@ -11,12 +11,17 @@ public class GameController implements InputEventListener {
 
     private final Board board;
     private final ScoreManager scoreManager;
+    private final GameHistory gameHistory;
     private final List<GameObserver> observers = new ArrayList<>();
+
+    private int scoreAtSpawn = 0;
 
     public GameController() {
         this.board = new SimpleBoard(GAME_HEIGHT, GAME_WIDTH);
         this.scoreManager = new ScoreManager();
+        this.gameHistory = new GameHistory();
         this.board.createNewBrick();
+        this.scoreAtSpawn = 0;
 
         scoreManager.scoreProperty().addListener((obs, oldVal, newVal) -> notifyScore(newVal.intValue()));
         scoreManager.levelProperty().addListener((obs, oldVal, newVal) -> notifyLevel(newVal.intValue()));
@@ -62,7 +67,6 @@ public class GameController implements InputEventListener {
 
     private void notifyGameOver() {
         scoreManager.checkAndSaveHighestScore();
-
         for (GameObserver o : observers) {
             o.onGameOver();
         }
@@ -82,7 +86,40 @@ public class GameController implements InputEventListener {
 
     // Game logic
 
+    /**
+     * Delegates state saving to the GameHistory helper.
+     */
+    private void saveState() {
+        gameHistory.save(new BoardMemento(
+                board.getBoardMatrix(),
+                scoreAtSpawn,
+                scoreManager.levelProperty().get()
+        ));
+    }
+
+    /**
+     * Delegates undo logic to the GameHistory helper.
+     */
+    private void undo() {
+        BoardMemento previousState = gameHistory.popState();
+        if (previousState == null) {
+            return;
+        }
+        board.restoreState(previousState.getBoardState());
+        scoreManager.restoreState(previousState.getScore(), previousState.getLevel());
+        board.resetCurrentBrick();
+
+        scoreAtSpawn = previousState.getScore();
+
+        notifyBackground();
+        notifyBoard();
+        notifyScore(previousState.getScore());
+        notifyLevel(previousState.getLevel());
+    }
+
     private void handlePieceLanded() {
+        saveState();
+
         board.mergeBrickToBackground();
         ClearRow clearRow = board.clearRows();
 
@@ -106,8 +143,16 @@ public class GameController implements InputEventListener {
         if (isGameOver) {
             notifyGameOver();
         } else {
+            scoreAtSpawn = scoreManager.scoreProperty().get();
             notifyBoard();
         }
+    }
+
+    // Input Events
+
+    @Override
+    public void onUndoEvent() {
+        undo();
     }
 
     @Override
@@ -165,6 +210,8 @@ public class GameController implements InputEventListener {
     public void createNewGame() {
         board.newGame();
         scoreManager.reset();
+        gameHistory.reset();
+        scoreAtSpawn = 0;
         notifyBackground();
         notifyBoard();
     }

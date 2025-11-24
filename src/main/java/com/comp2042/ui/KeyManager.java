@@ -72,6 +72,9 @@ public class KeyManager {
                 case C:
                     eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER));
                     break;
+                case R:
+                    eventListener.onUndoEvent();
+                    break;
                 case N:
                     guiController.startNewGame();
                     break;

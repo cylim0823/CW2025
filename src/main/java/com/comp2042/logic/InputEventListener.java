@@ -19,4 +19,6 @@ public interface InputEventListener {
     void createNewGame();
 
     int[][] getBoard();
+
+    void onUndoEvent();
 }

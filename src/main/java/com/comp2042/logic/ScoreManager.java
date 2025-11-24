@@ -12,7 +12,7 @@ public class ScoreManager {
 
     private static final int SCORE_PER_LINE = 50;
     private static final int LINES_PER_LEVEL_UP = 10;
-    private static final String HIGHEST_SCORE_FILE = "highest_score.txt"; // Renamed file too
+    private static final String HIGHEST_SCORE_FILE = "highest_score.txt";
 
     private int totalLinesCleared = 0;
     private final IntegerProperty currentLevel = new SimpleIntegerProperty(1);
@@ -23,6 +23,12 @@ public class ScoreManager {
     public ScoreManager() {
         loadHighestScore();
     }
+
+    public void restoreState(int savedScore, int savedLevel) {
+        this.score.scoreProperty().set(savedScore);
+        this.currentLevel.set(savedLevel);
+    }
+
 
     private void loadHighestScore() {
         try {
