@@ -1,6 +1,14 @@
-package com.comp2042.logic;
+package com.comp2042.controllers;
 
+import com.comp2042.logic.GameHistory;
+import com.comp2042.logic.InputEventListener;
+import com.comp2042.managers.ScoreManager;
+import com.comp2042.logic.board.Board;
+import com.comp2042.model.BoardMemento;
+import com.comp2042.logic.board.SimpleBoard;
 import com.comp2042.model.*;
+import com.comp2042.util.EventSource;
+
 import java.util.ArrayList;
 import java.util.List;
 

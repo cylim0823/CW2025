@@ -1,9 +1,15 @@
-package com.comp2042.ui;
+package com.comp2042.controllers;
 
-import com.comp2042.logic.GameController;
 import com.comp2042.logic.InputEventListener;
-import com.comp2042.logic.ScoreManager;
+import com.comp2042.managers.ScoreManager;
+import com.comp2042.managers.ColorManager;
+import com.comp2042.managers.GameLoopManager;
+import com.comp2042.managers.KeyManager;
+import com.comp2042.managers.SoundManager;
 import com.comp2042.model.*;
+import com.comp2042.ui.*;
+import com.comp2042.util.EventSource;
+import com.comp2042.util.EventType;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,7 +27,7 @@ import java.util.ResourceBundle;
 
 public class GuiController implements Initializable, GameObserver {
 
-    private static final String FONT_PATH = "/digital.ttf";
+    private static final String FONT_PATH = "/font/digital.ttf";
     private static final double FONT_SIZE = 38;
 
     @FXML private GridPane gamePanel;
@@ -206,7 +212,7 @@ public class GuiController implements Initializable, GameObserver {
         if (soundManager != null){
             soundManager.stopMusic();
         }
-        loadScene("mainMenu.fxml");
+        loadScene("fxml/mainMenu.fxml");
     }
 
     private void loadScene(String fxmlFile) {

@@ -1,4 +1,4 @@
-package com.comp2042.ui;
+package com.comp2042.managers;
 
 import com.comp2042.model.GameObserver;
 import com.comp2042.model.ViewData;
@@ -20,7 +20,7 @@ public class SoundManager implements GameObserver {
     public SoundManager() {
         // Background Music
         try {
-            URL musicUrl = getClass().getResource("/sound/background_music.mp3");
+            URL musicUrl = getClass().getResource("/audio/background_music.mp3");
             if (musicUrl != null) {
                 backgroundMusic = new MediaPlayer(new Media(musicUrl.toExternalForm()));
                 backgroundMusic.setCycleCount(MediaPlayer.INDEFINITE);
@@ -34,7 +34,7 @@ public class SoundManager implements GameObserver {
 
         // Line Clear Sound
         try {
-            URL clearUrl = getClass().getResource("/sound/line_clear.wav");
+            URL clearUrl = getClass().getResource("/audio/line_clear.wav");
             if (clearUrl != null) {
                 clearSound = new AudioClip(clearUrl.toExternalForm());
             } else {
@@ -46,7 +46,7 @@ public class SoundManager implements GameObserver {
 
         // Tetris Clear Sound
         try {
-            URL tetrisUrl = getClass().getResource("/sound/tetris_clear.wav");
+            URL tetrisUrl = getClass().getResource("/audio/tetris_clear.wav");
             if (tetrisUrl != null) {
                 tetrisSound = new AudioClip(tetrisUrl.toExternalForm());
             } else {
@@ -58,7 +58,7 @@ public class SoundManager implements GameObserver {
 
         // Drop Sound
         try {
-            URL dropUrl = getClass().getResource("/sound/drop.wav");
+            URL dropUrl = getClass().getResource("/audio/drop.wav");
             if (dropUrl != null) {
                 dropSound = new AudioClip(dropUrl.toExternalForm());
             } else {
@@ -70,7 +70,7 @@ public class SoundManager implements GameObserver {
 
         // Game Over Sound
         try {
-            URL overUrl = getClass().getResource("/sound/game_over.wav");
+            URL overUrl = getClass().getResource("/audio/game_over.wav");
             if (overUrl != null) {
                 gameOverSound = new AudioClip(overUrl.toExternalForm());
             } else {

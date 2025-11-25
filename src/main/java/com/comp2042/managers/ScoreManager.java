@@ -1,4 +1,4 @@
-package com.comp2042.logic;
+package com.comp2042.managers;
 
 import com.comp2042.model.Score;
 import javafx.beans.property.IntegerProperty;

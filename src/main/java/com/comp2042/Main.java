@@ -1,4 +1,4 @@
-package com.comp2042.ui;
+package com.comp2042;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -15,7 +15,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         // Load the new mainMenu.fxml instead of gameLayout.fxml
-        URL location = getClass().getClassLoader().getResource("mainMenu.fxml");
+        URL location = getClass().getClassLoader().getResource("fxml/mainMenu.fxml");
         ResourceBundle resources = null;
         FXMLLoader fxmlLoader = new FXMLLoader(location, resources);
         Parent root = fxmlLoader.load();

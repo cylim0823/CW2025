@@ -1,7 +1,10 @@
-package com.comp2042.ui;
+package com.comp2042.managers;
 
+import com.comp2042.controllers.GuiController;
 import com.comp2042.logic.InputEventListener;
 import com.comp2042.model.*;
+import com.comp2042.util.EventSource;
+import com.comp2042.util.EventType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 

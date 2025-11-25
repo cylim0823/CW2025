@@ -12,7 +12,7 @@
       styleClass="root"
       xmlns="http://javafx.com/javafx/11"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.comp2042.ui.MainMenuController">
+      fx:controller="com.comp2042.controllers.MainMenuController">
 
     <children>
         <Label styleClass="mainTitle" text="TETRIS" />
@@ -24,7 +24,7 @@
     </children>
 
     <stylesheets>
-        <URL value="@window_style.css" />
+        <URL value="@../css/window_style.css" />
     </stylesheets>
 
 </VBox>

@@ -1,4 +1,4 @@
-package com.comp2042.model;
+package com.comp2042.util;
 
 public enum EventType {
     DOWN, LEFT, RIGHT, ROTATE, HOLD

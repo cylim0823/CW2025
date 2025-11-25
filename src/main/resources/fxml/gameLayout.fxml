@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane fx:id="rootPane" prefHeight="700.0" prefWidth="1000.0" styleClass="root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.comp2042.ui.GuiController">
+<StackPane fx:id="rootPane" prefHeight="700.0" prefWidth="1000.0" styleClass="root" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.comp2042.controllers.GuiController">
 
     <VBox fx:id="gameScreen" alignment="CENTER" prefHeight="700.0" prefWidth="1000.0" spacing="10" style="-fx-padding: 20;">
 
@@ -96,7 +96,7 @@
     </VBox>
 
     <stylesheets>
-        <URL value="@window_style.css" />
+        <URL value="@../css/window_style.css" />
     </stylesheets>
 
 </StackPane>

@@ -1,5 +1,6 @@
-package com.comp2042.logic;
+package com.comp2042.logic.board;
 
+import com.comp2042.logic.BrickRotator;
 import com.comp2042.logic.bricks.Brick;
 import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;

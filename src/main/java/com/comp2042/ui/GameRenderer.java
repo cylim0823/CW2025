@@ -1,5 +1,6 @@
 package com.comp2042.ui;
 
+import com.comp2042.managers.ColorManager;
 import com.comp2042.model.ViewData;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;

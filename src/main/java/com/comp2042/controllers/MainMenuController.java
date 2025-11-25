@@ -1,6 +1,6 @@
-package com.comp2042.ui;
+package com.comp2042.controllers;
 
-import com.comp2042.logic.ScoreManager;
+import com.comp2042.managers.ScoreManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,7 +18,7 @@ import java.util.ResourceBundle;
 
 public class MainMenuController implements Initializable {
 
-    private static final String FONT_PATH = "/digital.ttf";
+    private static final String FONT_PATH = "/font/digital.ttf";
     private static final double FONT_SIZE = 38;
 
     @FXML private Label highScoreLabel;
@@ -51,7 +51,7 @@ public class MainMenuController implements Initializable {
     private void handleStartButton(ActionEvent event) throws IOException {
 
         // Load the game's FXML and its controller
-        URL location = getClass().getClassLoader().getResource("gameLayout.fxml");
+        URL location = getClass().getClassLoader().getResource("fxml/gameLayout.fxml");
         ResourceBundle resources = null;
         FXMLLoader fxmlLoader = new FXMLLoader(location, resources);
         Parent root = fxmlLoader.load();

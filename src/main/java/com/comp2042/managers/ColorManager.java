@@ -1,4 +1,4 @@
-package com.comp2042.ui;
+package com.comp2042.managers;
 
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
