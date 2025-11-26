@@ -133,7 +133,7 @@ public class GameRenderer {
                     int x = brick.getxPosition() + j;
                     int y = brick.getGhostYPosition() + i;
                     if (y >= HIDDEN_ROWS && y < ghostRectangles.length && x >= 0 && x < ghostRectangles[0].length) {
-                        ghostRectangles[y][x].setFill(colorManager.getGhostPaint(brickData[i][j]));
+                        ghostRectangles[y][x].setFill(Color.rgb(100, 100, 100, 0.4));
                         ghostRectangles[y][x].setVisible(true);
                     }
                 }
