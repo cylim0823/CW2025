@@ -8,8 +8,10 @@ import com.comp2042.managers.KeyManager;
 import com.comp2042.managers.SoundManager;
 import com.comp2042.model.*;
 import com.comp2042.ui.*;
+import com.comp2042.managers.EffectManager;
 import com.comp2042.util.EventSource;
 import com.comp2042.util.EventType;
+import com.comp2042.util.GameConfiguration;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -27,8 +29,8 @@ import java.util.ResourceBundle;
 
 public class GuiController implements Initializable, GameObserver {
 
-    private static final String FONT_PATH = "/font/digital.ttf";
-    private static final double FONT_SIZE = 38;
+    private static final String FONT_PATH = GameConfiguration.FONT_PATH;
+    private static final double FONT_SIZE = GameConfiguration.FONT_SIZE_DEFAULT;
 
     @FXML private GridPane gamePanel;
     @FXML private VBox nextBricksContainer;
@@ -48,6 +50,7 @@ public class GuiController implements Initializable, GameObserver {
     private GameRenderer gameRenderer;
     private GameLoopManager gameLoopManager;
     private KeyManager keyManager;
+    private EffectManager effectManager;
 
     private InputEventListener eventListener;
     private int currentScore = 0;
@@ -62,6 +65,7 @@ public class GuiController implements Initializable, GameObserver {
         this.gameRenderer = new GameRenderer(gamePanel, nextBricksContainer, holdBrickPanel, colorManager);
         this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel);
         this.keyManager = new KeyManager(this, gameLoopManager);
+        this.effectManager = new EffectManager(gamePanel);
         GameController logic = new GameController();
 
         logic.addObserver(soundManager);
@@ -128,6 +132,16 @@ public class GuiController implements Initializable, GameObserver {
 
             gameOverPane.setVisible(true);
             gameOverPane.toFront();
+        });
+    }
+
+    @Override
+    public void onDangerStateChanged(boolean isDanger) {
+        // Visual updates must happen on the JavaFX thread
+        Platform.runLater(() -> {
+            if (effectManager != null) {
+                effectManager.setDangerMode(isDanger);
+            }
         });
     }
 

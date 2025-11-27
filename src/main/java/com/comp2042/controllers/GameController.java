@@ -8,14 +8,12 @@ import com.comp2042.model.BoardMemento;
 import com.comp2042.logic.board.SimpleBoard;
 import com.comp2042.model.*;
 import com.comp2042.util.EventSource;
+import com.comp2042.util.GameConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GameController implements InputEventListener {
-
-    private static final int GAME_HEIGHT = 24;
-    private static final int GAME_WIDTH = 10;
 
     private final Board board;
     private final ScoreManager scoreManager;
@@ -25,7 +23,7 @@ public class GameController implements InputEventListener {
     private int scoreAtSpawn = 0;
 
     public GameController() {
-        this.board = new SimpleBoard(GAME_HEIGHT, GAME_WIDTH);
+        this.board = new SimpleBoard(GameConfiguration.BOARD_HEIGHT, GameConfiguration.BOARD_WIDTH);
         this.scoreManager = new ScoreManager();
         this.gameHistory = new GameHistory();
         this.board.createNewBrick();
@@ -43,6 +41,7 @@ public class GameController implements InputEventListener {
         observer.onBoardUpdated(board.getViewData());
         observer.onScoreUpdated(scoreManager.scoreProperty().get());
         observer.onLevelUpdated(scoreManager.levelProperty().get());
+        observer.onDangerStateChanged(board.isDangerState());
     }
 
     // Notification helpers
@@ -74,6 +73,7 @@ public class GameController implements InputEventListener {
     }
 
     private void notifyGameOver() {
+        notifyDanger(false);
         scoreManager.checkAndSaveHighestScore();
         for (GameObserver o : observers) {
             o.onGameOver();
@@ -89,6 +89,12 @@ public class GameController implements InputEventListener {
     private void notifyLineClear(int lines, String message) {
         for (GameObserver o : observers) {
             o.onLineCleared(lines, message);
+        }
+    }
+
+    private void notifyDanger(boolean isDanger) {
+        for (GameObserver o : observers) {
+            o.onDangerStateChanged(isDanger);
         }
     }
 
@@ -130,7 +136,6 @@ public class GameController implements InputEventListener {
 
         board.mergeBrickToBackground();
         ClearRow clearRow = board.clearRows();
-
         int linesCleared = clearRow.getLinesRemoved();
         scoreManager.onRowsCleared(linesCleared);
 
@@ -140,11 +145,13 @@ public class GameController implements InputEventListener {
                 case 1: message = "SINGLE"; break;
                 case 2: message = "DOUBLE"; break;
                 case 3: message = "TRIPLE"; break;
-                case 4: default: message = "TETRIS!"; break;
+                case GameConfiguration.LINES_FOR_TETRIS:
+                    default: message = "TETRIS!"; break;
             }
             notifyLineClear(linesCleared, message);
         }
-
+        boolean isDanger = board.isDangerState();
+        notifyDanger(isDanger);
         notifyBackground();
 
         boolean isGameOver = board.createNewBrick();

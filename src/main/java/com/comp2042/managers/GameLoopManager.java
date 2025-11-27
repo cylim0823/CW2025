@@ -1,5 +1,6 @@
 package com.comp2042.managers;
 
+import com.comp2042.util.GameConfiguration;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
@@ -9,22 +10,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
-import java.util.List;
 
 public class GameLoopManager {
-
-    private static final List<Long> LEVEL_SPEEDS = List.of(
-            400L, // Level 1
-            360L, // Level 2
-            320L, // Level 3
-            280L, // Level 4
-            240L, // Level 5
-            200L, // Level 6
-            160L, // Level 7
-            120L, // Level 8
-            100L, // Level 9
-            80L   // Level 10+ (Max Speed)
-    );
 
     private final BooleanProperty isPause = new SimpleBooleanProperty(false);
     private final BooleanProperty isGameOver = new SimpleBooleanProperty(false);
@@ -41,7 +28,7 @@ public class GameLoopManager {
     }
 
     public void initGameLoop() {
-        this.currentSpeedMillis = LEVEL_SPEEDS.get(0); // Default Level 1 speed
+        this.currentSpeedMillis = GameConfiguration.LEVEL_SPEEDS.get(0);
         this.timeLine = createTimeline(this.currentSpeedMillis);
     }
 
@@ -93,9 +80,11 @@ public class GameLoopManager {
         int index = level - 1;
 
         if (index < 0) index = 0;
-        if (index >= LEVEL_SPEEDS.size()) index = LEVEL_SPEEDS.size() - 1;
+        if (index >= GameConfiguration.LEVEL_SPEEDS.size()) {
+            index = GameConfiguration.LEVEL_SPEEDS.size() - 1;
+        }
 
-        long newSpeed = LEVEL_SPEEDS.get(index);
+        long newSpeed = GameConfiguration.LEVEL_SPEEDS.get(index);
 
         if (this.currentSpeedMillis == newSpeed || timeLine == null) {
             return;

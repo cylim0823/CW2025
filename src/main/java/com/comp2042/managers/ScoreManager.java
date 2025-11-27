@@ -1,6 +1,7 @@
 package com.comp2042.managers;
 
 import com.comp2042.model.Score;
+import com.comp2042.util.GameConfiguration;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import java.io.File;
@@ -10,9 +11,9 @@ import java.util.Scanner;
 
 public class ScoreManager {
 
-    private static final int SCORE_PER_LINE = 50;
-    private static final int LINES_PER_LEVEL_UP = 10;
-    private static final String HIGHEST_SCORE_FILE = "highest_score.txt";
+    private static final int SCORE_PER_LINE = GameConfiguration.SCORE_PER_LINE;
+    private static final int LINES_PER_LEVEL_UP = GameConfiguration.LINES_PER_LEVEL_UP;
+    private static final String HIGHEST_SCORE_FILE = GameConfiguration.PATH_HIGHEST_SCORE;
 
     private int totalLinesCleared = 0;
     private final IntegerProperty currentLevel = new SimpleIntegerProperty(1);

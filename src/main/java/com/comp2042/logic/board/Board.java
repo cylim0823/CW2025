@@ -32,4 +32,6 @@ public interface Board {
     void restoreState(int[][] savedGrid);
 
     void resetCurrentBrick();
+
+    boolean isDangerState();
 }

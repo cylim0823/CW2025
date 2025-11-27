@@ -1,6 +1,8 @@
 package com.comp2042.logic;
 
 import com.comp2042.model.BoardMemento;
+import com.comp2042.util.GameConfiguration;
+
 import java.util.Stack;
 
 /**
@@ -9,8 +11,6 @@ import java.util.Stack;
  * the player doesn't exceed the undo limit.
  */
 public class GameHistory {
-
-    private static final int MAX_UNDO_PER_GAME = 3;
 
     private final Stack<BoardMemento> history = new Stack<>();
     private int undoCount = 0;
@@ -32,7 +32,7 @@ public class GameHistory {
      */
     public BoardMemento popState() {
         // Check if user hit the limit
-        if (undoCount >= MAX_UNDO_PER_GAME) {
+        if (undoCount >= GameConfiguration.MAX_UNDO_PER_GAME) {
             return null;
         }
 

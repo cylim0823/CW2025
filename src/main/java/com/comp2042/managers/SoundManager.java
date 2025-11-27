@@ -2,6 +2,7 @@ package com.comp2042.managers;
 
 import com.comp2042.model.GameObserver;
 import com.comp2042.model.ViewData;
+import com.comp2042.util.GameConfiguration;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -9,76 +10,61 @@ import java.net.URL;
 
 public class SoundManager implements GameObserver {
 
-    private MediaPlayer backgroundMusic;
-    private AudioClip clearSound;
-    private AudioClip tetrisSound;
-    private AudioClip dropSound;
-    private AudioClip gameOverSound;
+    private final MediaPlayer backgroundMusic;
+    private final AudioClip clearSound;
+    private final AudioClip tetrisSound;
+    private final AudioClip dropSound;
+    private final AudioClip gameOverSound;
+
     private boolean isMuted = false;
     private long lastDropTime = 0;
 
     public SoundManager() {
-        // Background Music
-        try {
-            URL musicUrl = getClass().getResource("/audio/background_music.mp3");
-            if (musicUrl != null) {
-                backgroundMusic = new MediaPlayer(new Media(musicUrl.toExternalForm()));
-                backgroundMusic.setCycleCount(MediaPlayer.INDEFINITE);
-                backgroundMusic.setVolume(0.7);
-            } else {
-                System.err.println("Background music not found!");
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading background music: " + e.getMessage());
+        backgroundMusic = loadMediaPlayer(GameConfiguration.PATH_MUSIC_BG, GameConfiguration.VOL_MUSIC);
+        if (backgroundMusic != null) {
+            backgroundMusic.setCycleCount(MediaPlayer.INDEFINITE);
         }
 
-        // Line Clear Sound
-        try {
-            URL clearUrl = getClass().getResource("/audio/line_clear.wav");
-            if (clearUrl != null) {
-                clearSound = new AudioClip(clearUrl.toExternalForm());
-            } else {
-                System.err.println("Line clear sound not found!");
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading line clear sound: " + e.getMessage());
-        }
+        clearSound = loadAudioClip(GameConfiguration.PATH_AUDIO_CLEAR);
+        tetrisSound = loadAudioClip(GameConfiguration.PATH_AUDIO_TETRIS);
+        dropSound = loadAudioClip(GameConfiguration.PATH_AUDIO_DROP);
+        gameOverSound = loadAudioClip(GameConfiguration.PATH_AUDIO_GAMEOVER);
+    }
 
-        // Tetris Clear Sound
+    /**
+     * Helper method to load MediaPlayers safely.
+     */
+    private MediaPlayer loadMediaPlayer(String path, double volume) {
         try {
-            URL tetrisUrl = getClass().getResource("/audio/tetris_clear.wav");
-            if (tetrisUrl != null) {
-                tetrisSound = new AudioClip(tetrisUrl.toExternalForm());
+            URL url = getClass().getResource(path);
+            if (url != null) {
+                MediaPlayer player = new MediaPlayer(new Media(url.toExternalForm()));
+                player.setVolume(volume);
+                return player;
             } else {
-                System.err.println("Tetris sound not found!");
+                System.err.println("Audio file not found: " + path);
             }
         } catch (Exception e) {
-            System.err.println("Error loading tetris sound: " + e.getMessage());
+            System.err.println("Error loading music (" + path + "): " + e.getMessage());
         }
+        return null;
+    }
 
-        // Drop Sound
+    /**
+     * Helper method to load AudioClips safely.
+     */
+    private AudioClip loadAudioClip(String path) {
         try {
-            URL dropUrl = getClass().getResource("/audio/drop.wav");
-            if (dropUrl != null) {
-                dropSound = new AudioClip(dropUrl.toExternalForm());
+            URL url = getClass().getResource(path);
+            if (url != null) {
+                return new AudioClip(url.toExternalForm());
             } else {
-                System.err.println("Drop sound not found!");
+                System.err.println("Audio file not found: " + path);
             }
         } catch (Exception e) {
-            System.err.println("Error loading drop sound: " + e.getMessage());
+            System.err.println("Error loading sound (" + path + "): " + e.getMessage());
         }
-
-        // Game Over Sound
-        try {
-            URL overUrl = getClass().getResource("/audio/game_over.wav");
-            if (overUrl != null) {
-                gameOverSound = new AudioClip(overUrl.toExternalForm());
-            } else {
-                System.err.println("Game over sound not found!");
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading game over sound: " + e.getMessage());
-        }
+        return null;
     }
 
     public void playMusic() {
@@ -108,20 +94,20 @@ public class SoundManager implements GameObserver {
     public void onLineCleared(int lines, String message) {
         if (isMuted) return;
 
-        if (lines >= 4) {
-            if (tetrisSound != null) tetrisSound.play(0.7);
+        if (lines >= GameConfiguration.LINES_FOR_TETRIS) {
+            if (tetrisSound != null) tetrisSound.play(GameConfiguration.VOL_TETRIS);
         } else {
-            if (clearSound != null) clearSound.play(0.5);
+            if (clearSound != null) clearSound.play(GameConfiguration.VOL_CLEAR);
         }
     }
 
     @Override
     public void onBrickDropped() {
         long currentTime = System.currentTimeMillis();
-        // 150ms cooldown
-        if (currentTime - lastDropTime > 150) {
+
+        if (currentTime - lastDropTime > GameConfiguration.DROP_SOUND_COOLDOWN_MS) {
             if (dropSound != null && !isMuted) {
-                dropSound.play(0.3);
+                dropSound.play(GameConfiguration.VOL_DROP);
                 lastDropTime = currentTime;
             }
         }
@@ -133,6 +119,28 @@ public class SoundManager implements GameObserver {
         if (gameOverSound != null && !isMuted) {
             gameOverSound.play();
         }
+    }
+
+    public void setDangerMode(boolean isDanger) {
+        if (backgroundMusic == null) return;
+
+        double targetRate;
+        if (isDanger) {
+            targetRate = GameConfiguration.MUSIC_SPEED_DANGER;
+        } else {
+            targetRate = GameConfiguration.MUSIC_SPEED_NORMAL;
+        }
+
+        if (backgroundMusic.getRate() == targetRate) {
+            return;
+        }
+
+        backgroundMusic.setRate(targetRate);
+    }
+
+    @Override
+    public void onDangerStateChanged(boolean isDanger) {
+        setDangerMode(isDanger);
     }
 
     // Unused Observer methods

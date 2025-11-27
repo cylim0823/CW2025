@@ -2,6 +2,7 @@ package com.comp2042.ui;
 
 import com.comp2042.managers.ColorManager;
 import com.comp2042.model.ViewData;
+import com.comp2042.util.GameConfiguration;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -12,9 +13,7 @@ import java.util.List;
 
 public class GameRenderer {
 
-    private static final int BRICK_SIZE = 25;
-    private static final int HIDDEN_ROWS = 4;
-    private static final int PREVIEW_COUNT = 4;
+    private static final Color GHOST_COLOR_FILL = Color.rgb(100, 100, 100, 0.4);  // Transparent grey
 
     private final GridPane gamePanel;
     private final VBox nextBricksContainer;
@@ -36,7 +35,6 @@ public class GameRenderer {
     }
 
     public void initGameView(int[][] boardMatrix) {
-
         holdBrickPanel.getStyleClass().clear();
         holdBrickPanel.getStyleClass().add("holdBrick");
 
@@ -44,53 +42,59 @@ public class GameRenderer {
         ghostRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length];
         activeRectangles = new Rectangle[boardMatrix.length][boardMatrix[0].length];
 
-        for (int i = HIDDEN_ROWS; i < boardMatrix.length; i++) {
+        int hiddenRows = GameConfiguration.HIDDEN_ROWS;
+        int brickSize = GameConfiguration.BRICK_SIZE;
+        int matrixSize = GameConfiguration.BRICK_MATRIX_SIZE;
+        double strokeWidth = GameConfiguration.GRID_STROKE_WIDTH;
+        Color gridColor = Color.web(GameConfiguration.COLOR_GRID_HEX);
+
+        for (int i = hiddenRows; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
 
                 // Grid
-                Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                Rectangle rectangle = new Rectangle(brickSize, brickSize);
                 rectangle.setFill(Color.BLACK);
-                rectangle.setStroke(Color.web("#2b2b2b"));
-                rectangle.setStrokeWidth(1);
+                rectangle.setStroke(gridColor);
+                rectangle.setStrokeWidth(strokeWidth);
                 rectangle.setStrokeType(StrokeType.INSIDE);
                 displayMatrix[i][j] = rectangle;
-                gamePanel.add(rectangle, j, i - HIDDEN_ROWS);
+                gamePanel.add(rectangle, j, i - hiddenRows);
 
                 // Ghost Piece
-                Rectangle ghostRectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                Rectangle ghostRectangle = new Rectangle(brickSize, brickSize);
                 ghostRectangle.setFill(Color.TRANSPARENT);
                 ghostRectangle.setStroke(Color.BLACK);
-                ghostRectangle.setStrokeWidth(1);
+                ghostRectangle.setStrokeWidth(strokeWidth);
                 ghostRectangle.setStrokeType(StrokeType.INSIDE);
                 ghostRectangle.setVisible(false);
                 ghostRectangles[i][j] = ghostRectangle;
-                gamePanel.add(ghostRectangle, j, i - HIDDEN_ROWS);
+                gamePanel.add(ghostRectangle, j, i - hiddenRows);
 
                 // Active piece
-                Rectangle activeRectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                Rectangle activeRectangle = new Rectangle(brickSize, brickSize);
                 activeRectangle.setFill(Color.TRANSPARENT);
-                activeRectangle.setStrokeWidth(1);
+                activeRectangle.setStrokeWidth(strokeWidth);
                 activeRectangle.setStrokeType(StrokeType.INSIDE);
                 activeRectangles[i][j] = activeRectangle;
-                gamePanel.add(activeRectangle, j, i - HIDDEN_ROWS);
+                gamePanel.add(activeRectangle, j, i - hiddenRows);
             }
         }
 
-        // Initialize next/hold panels
+        // Initialize Next Bricks Panel
         nextBricksContainer.getChildren().clear();
         nextBrickRectangleList = new ArrayList<>();
 
-        for (int n = 0; n < PREVIEW_COUNT; n++) {
+        for (int n = 0; n < GameConfiguration.PREVIEW_COUNT; n++) {
             GridPane previewPanel = new GridPane();
             previewPanel.setStyle("-fx-background-color: transparent;");
 
-            Rectangle[][] previewRectangles = new Rectangle[4][4];
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+            Rectangle[][] previewRectangles = new Rectangle[matrixSize][matrixSize];
+            for (int i = 0; i < matrixSize; i++) {
+                for (int j = 0; j < matrixSize; j++) {
+                    Rectangle rectangle = new Rectangle(brickSize, brickSize);
                     rectangle.setFill(Color.TRANSPARENT);
                     rectangle.setStroke(Color.BLACK);
-                    rectangle.setStrokeWidth(1);
+                    rectangle.setStrokeWidth(strokeWidth);
                     rectangle.setStrokeType(StrokeType.INSIDE);
                     previewRectangles[i][j] = rectangle;
                     previewPanel.add(rectangle, j, i);
@@ -101,13 +105,14 @@ public class GameRenderer {
             nextBricksContainer.getChildren().add(previewPanel);
         }
 
-        holdBrickRectangles = new Rectangle[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+        // Initialize Hold Brick Panel
+        holdBrickRectangles = new Rectangle[matrixSize][matrixSize];
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                Rectangle rectangle = new Rectangle(brickSize, brickSize);
                 rectangle.setFill(Color.TRANSPARENT);
                 rectangle.setStroke(Color.BLACK);
-                rectangle.setStrokeWidth(1);
+                rectangle.setStrokeWidth(strokeWidth);
                 rectangle.setStrokeType(StrokeType.INSIDE);
                 holdBrickRectangles[i][j] = rectangle;
                 holdBrickPanel.add(rectangle, j, i);
@@ -116,7 +121,10 @@ public class GameRenderer {
     }
 
     public void refreshBrick(ViewData brick) {
-        for (int i = HIDDEN_ROWS; i < ghostRectangles.length; i++) {
+        int hiddenRows = GameConfiguration.HIDDEN_ROWS;
+
+        // Clear previous state
+        for (int i = hiddenRows; i < ghostRectangles.length; i++) {
             for (int j = 0; j < ghostRectangles[i].length; j++) {
                 ghostRectangles[i][j].setVisible(false);
                 activeRectangles[i][j].setFill(Color.TRANSPARENT);
@@ -126,14 +134,14 @@ public class GameRenderer {
 
         int[][] brickData = brick.getBrickData();
 
-        // Draw ghost
+        // Draw Ghost (Transparent Grey)
         for (int i = 0; i < brickData.length; i++) {
             for (int j = 0; j < brickData[i].length; j++) {
                 if (brickData[i][j] != 0) {
                     int x = brick.getxPosition() + j;
                     int y = brick.getGhostYPosition() + i;
-                    if (y >= HIDDEN_ROWS && y < ghostRectangles.length && x >= 0 && x < ghostRectangles[0].length) {
-                        ghostRectangles[y][x].setFill(Color.rgb(100, 100, 100, 0.4));
+                    if (y >= hiddenRows && y < ghostRectangles.length && x >= 0 && x < ghostRectangles[0].length) {
+                        ghostRectangles[y][x].setFill(GHOST_COLOR_FILL);
                         ghostRectangles[y][x].setVisible(true);
                     }
                 }
@@ -146,7 +154,7 @@ public class GameRenderer {
                 if (brickData[i][j] != 0) {
                     int x = brick.getxPosition() + j;
                     int y = brick.getyPosition() + i;
-                    if (y >= HIDDEN_ROWS && y < activeRectangles.length && x >= 0 && x < activeRectangles[0].length) {
+                    if (y >= hiddenRows && y < activeRectangles.length && x >= 0 && x < activeRectangles[0].length) {
                         activeRectangles[y][x].setFill(colorManager.getPaint(brickData[i][j]));
                         activeRectangles[y][x].setStroke(Color.BLACK);
                     }
@@ -160,22 +168,23 @@ public class GameRenderer {
 
     public void refreshUpcomingBricks(ViewData brick) {
         List<int[][]> dataList = brick.getUpcomingBricksData();
+        int matrixSize = GameConfiguration.BRICK_MATRIX_SIZE;
 
         for (int panelIndex = 0; panelIndex < nextBrickRectangleList.size(); panelIndex++) {
             Rectangle[][] currentPanelRects = nextBrickRectangleList.get(panelIndex);
 
             if (panelIndex < dataList.size()) {
                 int[][] data = dataList.get(panelIndex);
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
+                for (int i = 0; i < matrixSize; i++) {
+                    for (int j = 0; j < matrixSize; j++) {
                         currentPanelRects[i][j].setFill(colorManager.getPaint(data[i][j]));
                         if(data[i][j] != 0) currentPanelRects[i][j].setStroke(Color.BLACK);
                         else currentPanelRects[i][j].setStroke(Color.TRANSPARENT);
                     }
                 }
             } else {
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
+                for (int i = 0; i < matrixSize; i++) {
+                    for (int j = 0; j < matrixSize; j++) {
                         currentPanelRects[i][j].setFill(Color.TRANSPARENT);
                         currentPanelRects[i][j].setStroke(Color.TRANSPARENT);
                     }
@@ -185,18 +194,20 @@ public class GameRenderer {
     }
 
     public void refreshHoldBrick(ViewData brick) {
+        int matrixSize = GameConfiguration.BRICK_MATRIX_SIZE;
+
         if (brick.getHoldBrickData() != null) {
             int[][] data = brick.getHoldBrickData();
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
+            for (int i = 0; i < matrixSize; i++) {
+                for (int j = 0; j < matrixSize; j++) {
                     holdBrickRectangles[i][j].setFill(colorManager.getPaint(data[i][j]));
                     if(data[i][j] != 0) holdBrickRectangles[i][j].setStroke(Color.BLACK);
                     else holdBrickRectangles[i][j].setStroke(Color.TRANSPARENT);
                 }
             }
         } else {
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
+            for (int i = 0; i < matrixSize; i++) {
+                for (int j = 0; j < matrixSize; j++) {
                     holdBrickRectangles[i][j].setFill(Color.TRANSPARENT);
                     holdBrickRectangles[i][j].setStroke(Color.TRANSPARENT);
                 }
@@ -205,7 +216,8 @@ public class GameRenderer {
     }
 
     public void refreshGameBackground(int[][] board) {
-        for (int i = HIDDEN_ROWS; i < board.length; i++) {
+        int hiddenRows = GameConfiguration.HIDDEN_ROWS;
+        for (int i = hiddenRows; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 setRectangleData(board[i][j], displayMatrix[i][j]);
             }

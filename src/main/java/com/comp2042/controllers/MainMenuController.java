@@ -1,6 +1,7 @@
 package com.comp2042.controllers;
 
 import com.comp2042.managers.ScoreManager;
+import com.comp2042.util.GameConfiguration;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,8 +19,8 @@ import java.util.ResourceBundle;
 
 public class MainMenuController implements Initializable {
 
-    private static final String FONT_PATH = "/font/digital.ttf";
-    private static final double FONT_SIZE = 38;
+    private static final String FONT_PATH = GameConfiguration.FONT_PATH;
+    private static final double FONT_SIZE = GameConfiguration.FONT_SIZE_DEFAULT;
 
     @FXML private Label highScoreLabel;
 

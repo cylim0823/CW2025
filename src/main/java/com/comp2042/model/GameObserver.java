@@ -37,4 +37,6 @@ public interface GameObserver {
     void onGameOver();
 
     void onBrickDropped();
+
+    void onDangerStateChanged(boolean isDanger);
 }

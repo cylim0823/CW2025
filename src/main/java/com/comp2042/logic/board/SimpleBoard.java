@@ -7,6 +7,7 @@ import com.comp2042.logic.bricks.RandomBrickGenerator;
 import com.comp2042.model.ClearRow;
 import com.comp2042.model.NextShapeInfo;
 import com.comp2042.model.ViewData;
+import com.comp2042.util.GameConfiguration;
 import com.comp2042.util.MatrixOperations;
 
 import java.awt.Point;
@@ -82,7 +83,7 @@ public class SimpleBoard implements Board {
     }
 
     private int getStartX() {
-        return width / 2 - 2;
+        return width / 2 - GameConfiguration.SPAWN_X_OFFSET;
     }
 
     @Override
@@ -225,5 +226,24 @@ public class SimpleBoard implements Board {
             y++;
         }
         return y;
+    }
+
+    @Override
+    public boolean isDangerState() {
+        int hiddenRows = GameConfiguration.HIDDEN_ROWS;
+        int dangerZoneHeight = GameConfiguration.DANGER_ZONE_HEIGHT;
+
+        if (height < hiddenRows + dangerZoneHeight) {
+            return false;
+        }
+
+        for (int i = hiddenRows; i < hiddenRows + dangerZoneHeight; i++) {
+            for (int j = 0; j < width; j++) {
+                if (currentGameMatrix[i][j] != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
