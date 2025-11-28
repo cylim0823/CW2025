@@ -196,21 +196,13 @@ public class GameRenderer {
     public void refreshHoldBrick(ViewData brick) {
         int matrixSize = GameConfiguration.BRICK_MATRIX_SIZE;
 
-        if (brick.getHoldBrickData() != null) {
-            int[][] data = brick.getHoldBrickData();
-            for (int i = 0; i < matrixSize; i++) {
-                for (int j = 0; j < matrixSize; j++) {
-                    holdBrickRectangles[i][j].setFill(colorManager.getPaint(data[i][j]));
-                    if(data[i][j] != 0) holdBrickRectangles[i][j].setStroke(Color.BLACK);
-                    else holdBrickRectangles[i][j].setStroke(Color.TRANSPARENT);
-                }
-            }
-        } else {
-            for (int i = 0; i < matrixSize; i++) {
-                for (int j = 0; j < matrixSize; j++) {
-                    holdBrickRectangles[i][j].setFill(Color.TRANSPARENT);
-                    holdBrickRectangles[i][j].setStroke(Color.TRANSPARENT);
-                }
+        brick.getHoldBrickData();
+        int[][] data = brick.getHoldBrickData();
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                holdBrickRectangles[i][j].setFill(colorManager.getPaint(data[i][j]));
+                if(data[i][j] != 0) holdBrickRectangles[i][j].setStroke(Color.BLACK);
+                else holdBrickRectangles[i][j].setStroke(Color.TRANSPARENT);
             }
         }
     }

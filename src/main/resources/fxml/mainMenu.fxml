@@ -19,8 +19,23 @@
 
         <Label fx:id="highScoreLabel" styleClass="scoreClass" text="Highest Score: 0" />
 
-        <Button fx:id="startButton" onAction="#handleStartButton" prefWidth="200" prefHeight="50" text="START GAME" />
-        <Button fx:id="exitButton" onAction="#handleExitButton" prefWidth="200" prefHeight="50" text="EXIT" />
+        <Button fx:id="normalButton"
+                onAction="#handleStartButton"
+                prefWidth="200"
+                prefHeight="50"
+                text="NORMAL MODE" />
+
+        <Button fx:id="zenButton"
+                onAction="#handleZenModeButton"
+                prefWidth="200"
+                prefHeight="50"
+                text="ZEN MODE" />
+
+        <Button fx:id="exitButton"
+                onAction="#handleExitButton"
+                prefWidth="200"
+                prefHeight="50"
+                text="EXIT" />
     </children>
 
     <stylesheets>

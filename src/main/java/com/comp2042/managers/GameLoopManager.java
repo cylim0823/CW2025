@@ -28,7 +28,7 @@ public class GameLoopManager {
     }
 
     public void initGameLoop() {
-        this.currentSpeedMillis = GameConfiguration.LEVEL_SPEEDS.get(0);
+        this.currentSpeedMillis = GameConfiguration.LEVEL_SPEEDS.getFirst();
         this.timeLine = createTimeline(this.currentSpeedMillis);
     }
 

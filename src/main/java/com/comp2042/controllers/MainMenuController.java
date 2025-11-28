@@ -29,9 +29,7 @@ public class MainMenuController implements Initializable {
         loadCustomFont();
 
         ScoreManager sm = new ScoreManager();
-
         if (highScoreLabel != null) {
-            // REFACTOR: Changed getHighScore() to getHighestScore()
             highScoreLabel.setText("Highest Score: " + sm.getHighestScore());
         }
     }
@@ -44,33 +42,44 @@ public class MainMenuController implements Initializable {
         }
     }
 
-    /**
-     * This method is called when the "Start Game" button is clicked.
-     * It loads the game scene and replaces the menu scene.
-     */
+    // Button handlers
+
     @FXML
     private void handleStartButton(ActionEvent event) throws IOException {
+        loadGameScene(event, false); // FALSE = Normal Mode
+    }
 
-        // Load the game's FXML and its controller
-        URL location = getClass().getClassLoader().getResource("fxml/gameLayout.fxml");
-        ResourceBundle resources = null;
-        FXMLLoader fxmlLoader = new FXMLLoader(location, resources);
-        Parent root = fxmlLoader.load();
-        GuiController c = fxmlLoader.getController();
+    @FXML
+    private void handleZenModeButton(ActionEvent event) throws IOException {
+        loadGameScene(event, true);  // TRUE = Zen Mode
+    }
 
-        Scene currentScene = ((Node) event.getSource()).getScene();
-
-        // Just replace the root of the existing scene
-        currentScene.setRoot(root);
-        c.startNewGame();
+    @FXML
+    private void handleExitButton(ActionEvent event) {
+        Platform.exit();
     }
 
     /**
-     * This method is called when the "Exit" button is clicked.
+     * Helper method to load the game scene.
+     * Prevents code duplication between Start and Zen buttons.
      */
-    @FXML
-    private void handleExitButton(ActionEvent event) {
-        // Shuts down the application
-        Platform.exit();
+    private void loadGameScene(ActionEvent event, boolean isZenMode) throws IOException {
+        URL location = getClass().getClassLoader().getResource("fxml/gameLayout.fxml");
+        if (location == null) {
+            throw new IOException("Could not find fxml/gameLayout.fxml");
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(location);
+        Parent root = fxmlLoader.load();
+
+        GuiController c = fxmlLoader.getController();
+
+        c.initGameMode(isZenMode);
+        c.startNewGame();
+
+        Scene currentScene = ((Node) event.getSource()).getScene();
+        currentScene.setRoot(root);
+
+        javafx.application.Platform.runLater(root::requestFocus);
     }
 }

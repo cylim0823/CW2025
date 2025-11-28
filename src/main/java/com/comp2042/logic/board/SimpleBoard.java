@@ -97,13 +97,13 @@ public class SimpleBoard implements Board {
     @Override
     public ViewData getViewData() {
         int ghostY = getDropPosition();
-        int[][] holdData = heldBrick != null ? heldBrick.getShapeMatrix().get(0) : new int[4][4];
+        int[][] holdData = heldBrick != null ? heldBrick.getShapeMatrix().getFirst() : new int[4][4];
 
         List<Brick> upcomingBricks = brickGenerator.getUpcomingBricks();
 
         List<int[][]> upcomingData = new ArrayList<>();
         for (Brick b : upcomingBricks) {
-            upcomingData.add(b.getShapeMatrix().get(0)); // Get the default shape
+            upcomingData.add(b.getShapeMatrix().getFirst()); // Get the default shape
         }
         return new ViewData(
                 brickRotator.getCurrentShape(),

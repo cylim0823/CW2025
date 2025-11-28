@@ -2,27 +2,30 @@ package com.comp2042.managers;
 
 import com.comp2042.model.Score;
 import com.comp2042.util.GameConfiguration;
+import com.comp2042.util.ScoreFileHandler;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Scanner;
 
 public class ScoreManager {
 
     private static final int SCORE_PER_LINE = GameConfiguration.SCORE_PER_LINE;
     private static final int LINES_PER_LEVEL_UP = GameConfiguration.LINES_PER_LEVEL_UP;
-    private static final String HIGHEST_SCORE_FILE = GameConfiguration.PATH_HIGHEST_SCORE;
 
     private int totalLinesCleared = 0;
     private final IntegerProperty currentLevel = new SimpleIntegerProperty(1);
     private final Score score = new Score();
     private int highestScore = 0;
+    private final ScoreFileHandler fileHandler;
+    private boolean isZenMode = false;
 
-    // Constructor
     public ScoreManager() {
-        loadHighestScore();
+        this.fileHandler = new ScoreFileHandler(GameConfiguration.PATH_HIGHEST_SCORE);
+
+        this.highestScore = fileHandler.loadHighScore();
+    }
+
+    public void setZenMode(boolean isZenMode){
+        this.isZenMode = isZenMode;
     }
 
     public void restoreState(int savedScore, int savedLevel) {
@@ -30,37 +33,13 @@ public class ScoreManager {
         this.currentLevel.set(savedLevel);
     }
 
-
-    private void loadHighestScore() {
-        try {
-            File file = new File(HIGHEST_SCORE_FILE);
-            if (file.exists()) {
-                Scanner scanner = new Scanner(file);
-                if (scanner.hasNextInt()) {
-                    highestScore = scanner.nextInt();
-                }
-                scanner.close();
-            }
-        } catch (Exception e) {
-            System.err.println("Could not load highest score.");
-        }
-    }
-
-    private void saveHighestScore() {
-        try {
-            FileWriter writer = new FileWriter(HIGHEST_SCORE_FILE);
-            writer.write(String.valueOf(highestScore));
-            writer.close();
-        } catch (IOException e) {
-            System.err.println("Could not save highest score.");
-        }
-    }
-
     public boolean checkAndSaveHighestScore() {
+        if (isZenMode) return false;
+
         int current = score.scoreProperty().get();
         if (current > highestScore) {
             highestScore = current;
-            saveHighestScore();
+            fileHandler.saveHighScore(highestScore);
             return true;
         }
         return false;
@@ -77,7 +56,7 @@ public class ScoreManager {
         totalLinesCleared = 0;
         currentLevel.set(1);
         score.reset();
-        loadHighestScore();
+        highestScore = fileHandler.loadHighScore();
     }
 
     public void onRowsCleared(int linesRemoved){
@@ -85,8 +64,11 @@ public class ScoreManager {
             int scoreBonus = SCORE_PER_LINE * linesRemoved * linesRemoved;
             score.add(scoreBonus);
             totalLinesCleared += linesRemoved;
-            while (totalLinesCleared >= currentLevel.get() * LINES_PER_LEVEL_UP){
-                currentLevel.set(currentLevel.get() + 1);
+
+            if (!isZenMode){
+                while (totalLinesCleared >= currentLevel.get() * LINES_PER_LEVEL_UP) {
+                    currentLevel.set(currentLevel.get() + 1);
+            }
             }
         }
     }

@@ -20,7 +20,8 @@ public class GameController implements InputEventListener {
     private final GameHistory gameHistory;
     private final List<GameObserver> observers = new ArrayList<>();
 
-    private int scoreAtSpawn = 0;
+    private boolean isZenMode = false;
+    private int scoreAtSpawn;
 
     public GameController() {
         this.board = new SimpleBoard(GameConfiguration.BOARD_HEIGHT, GameConfiguration.BOARD_WIDTH);
@@ -31,6 +32,11 @@ public class GameController implements InputEventListener {
 
         scoreManager.scoreProperty().addListener((obs, oldVal, newVal) -> notifyScore(newVal.intValue()));
         scoreManager.levelProperty().addListener((obs, oldVal, newVal) -> notifyLevel(newVal.intValue()));
+    }
+
+    public void setZenMode(boolean isZenMode) {
+        this.isZenMode = isZenMode;
+        this.scoreManager.setZenMode(isZenMode);
     }
 
     // Observer management
@@ -93,6 +99,9 @@ public class GameController implements InputEventListener {
     }
 
     private void notifyDanger(boolean isDanger) {
+        if (isZenMode){
+            isDanger = false;
+        }
         for (GameObserver o : observers) {
             o.onDangerStateChanged(isDanger);
         }
@@ -140,14 +149,12 @@ public class GameController implements InputEventListener {
         scoreManager.onRowsCleared(linesCleared);
 
         if (linesCleared > 0) {
-            String message;
-            switch (linesCleared) {
-                case 1: message = "SINGLE"; break;
-                case 2: message = "DOUBLE"; break;
-                case 3: message = "TRIPLE"; break;
-                case GameConfiguration.LINES_FOR_TETRIS:
-                    default: message = "TETRIS!"; break;
-            }
+            String message = switch (linesCleared) {
+                case 1 -> "SINGLE";
+                case 2 -> "DOUBLE";
+                case 3 -> "TRIPLE";
+                default -> "TETRIS!";
+            };
             notifyLineClear(linesCleared, message);
         }
         boolean isDanger = board.isDangerState();
@@ -155,8 +162,20 @@ public class GameController implements InputEventListener {
         notifyBackground();
 
         boolean isGameOver = board.createNewBrick();
+
         if (isGameOver) {
-            notifyGameOver();
+            if (isZenMode) {
+                // Zen mode restarts
+                board.newGame();
+                scoreManager.reset();
+                gameHistory.reset();
+                scoreAtSpawn = 0;
+                notifyBackground();
+                notifyBoard();
+            } else {
+                // Normal mode shows game over
+                notifyGameOver();
+            }
         } else {
             scoreAtSpawn = scoreManager.scoreProperty().get();
             notifyBoard();
@@ -227,6 +246,7 @@ public class GameController implements InputEventListener {
         scoreManager.reset();
         gameHistory.reset();
         scoreAtSpawn = 0;
+        notifyDanger(false);
         notifyBackground();
         notifyBoard();
     }

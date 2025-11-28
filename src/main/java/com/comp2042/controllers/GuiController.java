@@ -51,6 +51,7 @@ public class GuiController implements Initializable, GameObserver {
     private GameLoopManager gameLoopManager;
     private KeyManager keyManager;
     private EffectManager effectManager;
+    private GameController gameController;
 
     private InputEventListener eventListener;
     private int currentScore = 0;
@@ -66,20 +67,29 @@ public class GuiController implements Initializable, GameObserver {
         this.gameLoopManager = new GameLoopManager(this::onGameTick, countdownLabel);
         this.keyManager = new KeyManager(this, gameLoopManager);
         this.effectManager = new EffectManager(gamePanel);
-        GameController logic = new GameController();
+        this.gameController = new GameController();
 
-        logic.addObserver(soundManager);
+        gameController.addObserver(soundManager);
         soundManager.playMusic();
 
-        gameRenderer.initGameView(logic.getBoard());
+        gameRenderer.initGameView(gameController.getBoard());
 
         gameLoopManager.initGameLoop();
-        logic.addObserver(this);
+        gameController.addObserver(this);
 
-        this.setEventListener(logic);
+        this.setEventListener(gameController);
         rootPane.setOnKeyPressed(keyManager::handleInput);
 
         resetUIState();
+    }
+
+    public void initGameMode(boolean isZenMode) {
+        if (gameController != null) {
+            gameController.setZenMode(isZenMode);
+        }
+        if (levelLabel != null) {
+            levelLabel.setVisible(!isZenMode);
+        }
     }
 
     // Observer methods
