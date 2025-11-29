@@ -31,7 +31,7 @@ public class GameConfiguration {
     );
 
     // Gameplay rules
-    public static final int MAX_UNDO_PER_GAME = 3;
+    public static final int UNDO_LIMIT_NORMAL = 3;
     public static final int DANGER_ZONE_HEIGHT = 5;
 
     // Visual effects

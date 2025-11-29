@@ -1,6 +1,7 @@
 package com.comp2042.controllers;
 
 import com.comp2042.logic.InputEventListener;
+import com.comp2042.logic.mode.GameMode;
 import com.comp2042.managers.ScoreManager;
 import com.comp2042.managers.ColorManager;
 import com.comp2042.managers.GameLoopManager;
@@ -83,12 +84,12 @@ public class GuiController implements Initializable, GameObserver {
         resetUIState();
     }
 
-    public void initGameMode(boolean isZenMode) {
+    public void initGameMode(GameMode mode) {
         if (gameController != null) {
-            gameController.setZenMode(isZenMode);
+            gameController.setGameMode(mode);
         }
         if (levelLabel != null) {
-            levelLabel.setVisible(!isZenMode);
+            levelLabel.setVisible(mode.isLevelLabelVisible());
         }
     }
 

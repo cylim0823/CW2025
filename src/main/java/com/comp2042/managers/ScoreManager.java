@@ -16,16 +16,21 @@ public class ScoreManager {
     private final Score score = new Score();
     private int highestScore = 0;
     private final ScoreFileHandler fileHandler;
-    private boolean isZenMode = false;
+
+    private boolean savingEnabled = true;
+    private boolean levelingEnabled = true;
 
     public ScoreManager() {
         this.fileHandler = new ScoreFileHandler(GameConfiguration.PATH_HIGHEST_SCORE);
-
         this.highestScore = fileHandler.loadHighScore();
     }
 
-    public void setZenMode(boolean isZenMode){
-        this.isZenMode = isZenMode;
+    public void setSavingEnabled(boolean enabled) {
+        this.savingEnabled = enabled;
+    }
+
+    public void setLevelingEnabled(boolean enabled) {
+        this.levelingEnabled = enabled;
     }
 
     public void restoreState(int savedScore, int savedLevel) {
@@ -34,7 +39,7 @@ public class ScoreManager {
     }
 
     public boolean checkAndSaveHighestScore() {
-        if (isZenMode) return false;
+        if (!savingEnabled) return false;
 
         int current = score.scoreProperty().get();
         if (current > highestScore) {
@@ -65,10 +70,10 @@ public class ScoreManager {
             score.add(scoreBonus);
             totalLinesCleared += linesRemoved;
 
-            if (!isZenMode){
-                while (totalLinesCleared >= currentLevel.get() * LINES_PER_LEVEL_UP) {
+            if (levelingEnabled) {
+                while (totalLinesCleared >= currentLevel.get() * LINES_PER_LEVEL_UP){
                     currentLevel.set(currentLevel.get() + 1);
-            }
+                }
             }
         }
     }

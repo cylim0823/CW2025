@@ -1,5 +1,8 @@
 package com.comp2042.controllers;
 
+import com.comp2042.logic.mode.GameMode;
+import com.comp2042.logic.mode.NormalMode;
+import com.comp2042.logic.mode.ZenMode;
 import com.comp2042.managers.ScoreManager;
 import com.comp2042.util.GameConfiguration;
 import javafx.application.Platform;
@@ -46,12 +49,12 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void handleStartButton(ActionEvent event) throws IOException {
-        loadGameScene(event, false); // FALSE = Normal Mode
+        loadGameScene(event, new NormalMode());
     }
 
     @FXML
     private void handleZenModeButton(ActionEvent event) throws IOException {
-        loadGameScene(event, true);  // TRUE = Zen Mode
+        loadGameScene(event, new ZenMode());
     }
 
     @FXML
@@ -61,9 +64,9 @@ public class MainMenuController implements Initializable {
 
     /**
      * Helper method to load the game scene.
-     * Prevents code duplication between Start and Zen buttons.
+     * REFACTORED: Accepts GameMode interface
      */
-    private void loadGameScene(ActionEvent event, boolean isZenMode) throws IOException {
+    private void loadGameScene(ActionEvent event, GameMode mode) throws IOException {
         URL location = getClass().getClassLoader().getResource("fxml/gameLayout.fxml");
         if (location == null) {
             throw new IOException("Could not find fxml/gameLayout.fxml");
@@ -74,7 +77,8 @@ public class MainMenuController implements Initializable {
 
         GuiController c = fxmlLoader.getController();
 
-        c.initGameMode(isZenMode);
+        // Pass the Strategy Object
+        c.initGameMode(mode);
         c.startNewGame();
 
         Scene currentScene = ((Node) event.getSource()).getScene();

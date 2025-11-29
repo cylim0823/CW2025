@@ -1,7 +1,6 @@
 package com.comp2042.logic;
 
 import com.comp2042.model.BoardMemento;
-import com.comp2042.util.GameConfiguration;
 
 import java.util.Stack;
 
@@ -28,11 +27,11 @@ public class GameHistory {
     /**
      * Tries to get the previous game state.
      * It checks if the player has enough "undo lives" left before returning the state.
+     * @param maxAllowed The undo limit defined by the current Game Mode.
      * @return The previous state if valid, or null if the stack is empty or limit reached.
      */
-    public BoardMemento popState() {
-        // Check if user hit the limit
-        if (undoCount >= GameConfiguration.MAX_UNDO_PER_GAME) {
+    public BoardMemento popState(int maxAllowed) {
+        if (undoCount >= maxAllowed) {
             return null;
         }
 

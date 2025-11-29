@@ -2,6 +2,8 @@ package com.comp2042.controllers;
 
 import com.comp2042.logic.GameHistory;
 import com.comp2042.logic.InputEventListener;
+import com.comp2042.logic.mode.GameMode;
+import com.comp2042.logic.mode.NormalMode;
 import com.comp2042.managers.ScoreManager;
 import com.comp2042.logic.board.Board;
 import com.comp2042.model.BoardMemento;
@@ -20,7 +22,7 @@ public class GameController implements InputEventListener {
     private final GameHistory gameHistory;
     private final List<GameObserver> observers = new ArrayList<>();
 
-    private boolean isZenMode = false;
+    private GameMode currentMode;
     private int scoreAtSpawn;
 
     public GameController() {
@@ -32,11 +34,13 @@ public class GameController implements InputEventListener {
 
         scoreManager.scoreProperty().addListener((obs, oldVal, newVal) -> notifyScore(newVal.intValue()));
         scoreManager.levelProperty().addListener((obs, oldVal, newVal) -> notifyLevel(newVal.intValue()));
+        this.currentMode = new NormalMode();
     }
 
-    public void setZenMode(boolean isZenMode) {
-        this.isZenMode = isZenMode;
-        this.scoreManager.setZenMode(isZenMode);
+    public void setGameMode(GameMode mode) {
+        this.currentMode = mode;
+        this.scoreManager.setSavingEnabled(mode.isHighScoreEnabled());
+        this.scoreManager.setLevelingEnabled(mode.isLevelingEnabled());
     }
 
     // Observer management
@@ -78,9 +82,12 @@ public class GameController implements InputEventListener {
         }
     }
 
-    private void notifyGameOver() {
+
+    public void notifyGameOver() {
         notifyDanger(false);
-        scoreManager.checkAndSaveHighestScore();
+        if (currentMode.isHighScoreEnabled()) {
+            scoreManager.checkAndSaveHighestScore();
+        }
         for (GameObserver o : observers) {
             o.onGameOver();
         }
@@ -99,7 +106,7 @@ public class GameController implements InputEventListener {
     }
 
     private void notifyDanger(boolean isDanger) {
-        if (isZenMode){
+        if (!currentMode.isDangerAllowed()) {
             isDanger = false;
         }
         for (GameObserver o : observers) {
@@ -109,9 +116,6 @@ public class GameController implements InputEventListener {
 
     // Game logic
 
-    /**
-     * Delegates state saving to the GameHistory helper.
-     */
     private void saveState() {
         gameHistory.save(new BoardMemento(
                 board.getBoardMatrix(),
@@ -120,11 +124,10 @@ public class GameController implements InputEventListener {
         ));
     }
 
-    /**
-     * Delegates undo logic to the GameHistory helper.
-     */
     private void undo() {
-        BoardMemento previousState = gameHistory.popState();
+        int limit = currentMode.getUndoLimit();
+        BoardMemento previousState = gameHistory.popState(limit);
+
         if (previousState == null) {
             return;
         }
@@ -153,10 +156,12 @@ public class GameController implements InputEventListener {
                 case 1 -> "SINGLE";
                 case 2 -> "DOUBLE";
                 case 3 -> "TRIPLE";
-                default -> "TETRIS!";
+                case GameConfiguration.LINES_FOR_TETRIS -> "TETRIS!";
+                default -> "NICE!";
             };
             notifyLineClear(linesCleared, message);
         }
+
         boolean isDanger = board.isDangerState();
         notifyDanger(isDanger);
         notifyBackground();
@@ -164,18 +169,7 @@ public class GameController implements InputEventListener {
         boolean isGameOver = board.createNewBrick();
 
         if (isGameOver) {
-            if (isZenMode) {
-                // Zen mode restarts
-                board.newGame();
-                scoreManager.reset();
-                gameHistory.reset();
-                scoreAtSpawn = 0;
-                notifyBackground();
-                notifyBoard();
-            } else {
-                // Normal mode shows game over
-                notifyGameOver();
-            }
+            currentMode.handleGameOver(this);
         } else {
             scoreAtSpawn = scoreManager.scoreProperty().get();
             notifyBoard();
@@ -183,7 +177,6 @@ public class GameController implements InputEventListener {
     }
 
     // Input Events
-
     @Override
     public void onUndoEvent() {
         undo();
@@ -198,7 +191,7 @@ public class GameController implements InputEventListener {
         } else {
             if (event.getEventSource() == EventSource.USER) {
                 scoreManager.onSoftDrop();
-                notifyBrickDropped();  // Play sound
+                notifyBrickDropped();
             }
             notifyBoard();
         }
@@ -216,7 +209,7 @@ public class GameController implements InputEventListener {
     public void onHoldEvent(MoveEvent event) {
         boolean isGameOver = board.holdCurrentBrick();
         if (isGameOver) {
-            notifyGameOver();
+            currentMode.handleGameOver(this);
         } else {
             notifyBoard();
         }
@@ -246,7 +239,9 @@ public class GameController implements InputEventListener {
         scoreManager.reset();
         gameHistory.reset();
         scoreAtSpawn = 0;
-        notifyDanger(false);
+
+        notifyDanger(false); // Reset music/shake
+
         notifyBackground();
         notifyBoard();
     }
