@@ -11,6 +11,17 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
+/**
+ * A custom UI component representing a temporary, floating notification.
+ * <p>
+ * This class extends {@link BorderPane} to display stylized text (e.g., scoring bonuses like "TETRIS!")
+ * that appears on the screen, floats upwards, fades out, and then automatically removes itself.
+ * </p>
+ * <p>
+ * <b>Visual Polish:</b> This component adds "Game Feel" by using JavaFX effects (Glow)
+ * and parallel animations to provide immediate visual feedback for player actions.
+ * </p>
+ */
 public class NotificationPanel extends BorderPane {
 
     private static final double FADE_DURATION = 2000;
@@ -20,6 +31,15 @@ public class NotificationPanel extends BorderPane {
     private static final double PANEL_WIDTH = 220;
     private static final double PANEL_HEIGHT = 200;
 
+    /**
+     * Constructs a new notification panel.
+     * <p>
+     * Applies specific CSS styling ("bonusStyle") and visual effects (Glow)
+     * to ensure the text stands out against the game background.
+     * </p>
+     *
+     * @param text the message to display (e.g., score value or combo name).
+     */
     public NotificationPanel(String text) {
         setMinHeight(PANEL_HEIGHT);
         setMinWidth(PANEL_WIDTH);
@@ -33,6 +53,22 @@ public class NotificationPanel extends BorderPane {
         setCenter(score);
     }
 
+    /**
+     * Triggers the "Float and Fade" animation sequence.
+     * <p>
+     * This method executes a {@link ParallelTransition} combining:
+     * <ul>
+     * <li><b>Translation:</b> Moving the text upwards.</li>
+     * <li><b>Fade:</b> Changing opacity from 1.0 to 0.0.</li>
+     * </ul>
+     * </p>
+     * <p>
+     * <b>Self-Cleanup:</b> Upon animation completion, this component automatically removes
+     * itself from the provided parent list to prevent UI clutter and memory leaks.
+     * </p>
+     *
+     * @param list the observable children list of the parent pane (used for self-removal).
+     */
     public void showScore(ObservableList<Node> list) {
         FadeTransition ft = new FadeTransition(Duration.millis(FADE_DURATION), this);
         TranslateTransition tt = new TranslateTransition(Duration.millis(MOVE_DURATION), this);
@@ -41,7 +77,10 @@ public class NotificationPanel extends BorderPane {
         ft.setFromValue(1);
         ft.setToValue(0);
         ParallelTransition transition = new ParallelTransition(tt, ft);
+
+        // Lambda callback to remove this node from the Scene Graph when finished
         transition.setOnFinished(event -> list.remove(NotificationPanel.this));
+
         transition.play();
     }
 }

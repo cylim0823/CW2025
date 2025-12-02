@@ -1,42 +1,83 @@
 package com.comp2042.model;
 
+/**
+ * Defines the contract for components that wish to listen to game events.
+ * <p>
+ * <b>Design Pattern: Observer</b><br>
+ * This interface facilitates loose coupling between the Game Logic (Subject) and the
+ * UI/Sound systems (Observers). The {@link com.comp2042.controllers.GameController} notifies
+ * all registered observers whenever the game state changes, without needing to know
+ * the specific implementation details of the listeners.
+ * </p>
+ */
 public interface GameObserver {
+
     /**
-     * Called when the falling tetris brick moves or rotates
-     * @param viewData The data needed to draw the current piece.
+     * Triggered when the active falling brick moves, rotates, or spawns.
+     * <p>
+     * Used by the View to redraw the dynamic elements of the board (active piece, ghost piece).
+     * </p>
+     *
+     * @param viewData a snapshot containing the current piece coordinates and shape.
      */
     void onBoardUpdated(ViewData viewData);
 
     /**
-     * Called when the static background grid changes (when a row is cleared)
-     * @param boardMatrix The 2D array representing the board colors.
+     * Triggered when the static background grid changes (e.g., when a piece locks or rows are cleared).
+     * <p>
+     * Used by the View to repaint the locked blocks on the grid.
+     * </p>
+     *
+     * @param boardMatrix the 2D array representing the color codes of locked blocks.
      */
     void onGameBackgroundUpdated(int[][] boardMatrix);
 
     /**
-     * Called when the score changes.
-     * @param score The new score value.
+     * Triggered when the player's score increases.
+     *
+     * @param score the new total score.
      */
     void onScoreUpdated(int score);
 
     /**
-     * Called when the level increases.
-     * @param level The new level.
+     * Triggered when the player advances to a new level.
+     * This usually implies an increase in game speed.
+     *
+     * @param level the new level number.
      */
     void onLevelUpdated(int level);
 
     /**
-     * Called when rows are cleared (Single, Double, Tetris!).
-     * @param message The notification text to display.
+     * Triggered when one or more rows are cleared.
+     * <p>
+     * Used to display visual notifications (e.g., "TETRIS!") or play celebration sounds.
+     * </p>
+     *
+     * @param lines the number of lines cleared in this event.
+     * @param message the notification text associated with the clear (e.g., "Single", "Double").
      */
-    void onLineCleared(int Lines, String message);
+    void onLineCleared(int lines, String message);
 
     /**
-     * Called when the game ends.
+     * Triggered when the game ends (Game Over).
+     * Used to stop music, show the game-over screen, and display final scores.
      */
     void onGameOver();
 
+    /**
+     * Triggered when a brick lands (soft drop or hard drop).
+     * Primarily used by the audio system to play a landing sound effect.
+     */
     void onBrickDropped();
 
+    /**
+     * Triggered when the "Danger" state changes.
+     * <p>
+     * The game enters a danger state when the stack reaches a critical height.
+     * Observers can use this to play intense music or shake the screen.
+     * </p>
+     *
+     * @param isDanger true if the game is in a critical state; false otherwise.
+     */
     void onDangerStateChanged(boolean isDanger);
 }

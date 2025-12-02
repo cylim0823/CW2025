@@ -8,6 +8,19 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import java.net.URL;
 
+/**
+ * Manages the audio subsystem, handling background music playback and sound effects.
+ * <p>
+ * <b>Design Pattern: Observer</b><br>
+ * This class implements {@link GameObserver}, allowing it to react autonomously to game events
+ * (like line clears or game over) triggered by the {@link com.comp2042.controllers.GameController}.
+ * This decouples the game logic from the specific audio implementation.
+ * </p>
+ * <p>
+ * It handles resource loading safely and manages global audio states like muting and
+ * playback speed adjustments during high-intensity moments.
+ * </p>
+ */
 public class SoundManager implements GameObserver {
 
     private final MediaPlayer backgroundMusic;
@@ -19,6 +32,14 @@ public class SoundManager implements GameObserver {
     private boolean isMuted = false;
     private long lastDropTime = 0;
 
+    /**
+     * Constructs the SoundManager and loads all audio assets.
+     * <p>
+     * Paths and volumes are retrieved from {@link GameConfiguration}.
+     * Resources are loaded with error handling to ensure the game can continue
+     * silently if an audio file is missing.
+     * </p>
+     */
     public SoundManager() {
         backgroundMusic = loadMediaPlayer(GameConfiguration.PATH_MUSIC_BG, GameConfiguration.VOL_MUSIC);
         if (backgroundMusic != null) {
@@ -32,7 +53,11 @@ public class SoundManager implements GameObserver {
     }
 
     /**
-     * Helper method to load MediaPlayers safely.
+     * Helper method to safely load a background music file.
+     *
+     * @param path relative path to the resource
+     * @param volume initial volume level (0.0 to 1.0)
+     * @return a configured MediaPlayer, or null if loading failed
      */
     private MediaPlayer loadMediaPlayer(String path, double volume) {
         try {
@@ -51,7 +76,10 @@ public class SoundManager implements GameObserver {
     }
 
     /**
-     * Helper method to load AudioClips safely.
+     * Helper method to safely load short sound effects.
+     *
+     * @param path relative path to the resource
+     * @return a loaded AudioClip, or null if loading failed
      */
     private AudioClip loadAudioClip(String path) {
         try {
@@ -67,18 +95,24 @@ public class SoundManager implements GameObserver {
         return null;
     }
 
+    /** Starts background music playback if not muted. */
     public void playMusic() {
         if (backgroundMusic != null && !isMuted) {
             backgroundMusic.play();
         }
     }
 
+    /** Stops the background music. */
     public void stopMusic() {
         if (backgroundMusic != null) {
             backgroundMusic.stop();
         }
     }
 
+    /**
+     * Toggles the mute state for all audio.
+     * Pauses background music immediately if muted, or resumes it if unmuted.
+     */
     public void toggleMute() {
         isMuted = !isMuted;
         if (isMuted) {
@@ -90,6 +124,13 @@ public class SoundManager implements GameObserver {
 
     // Observer Events
 
+    /**
+     * plays a sound effect when lines are cleared.
+     * Selects a special "Tetris" sound if 4 lines are cleared at once.
+     *
+     * @param lines number of lines cleared
+     * @param message notification message (unused here)
+     */
     @Override
     public void onLineCleared(int lines, String message) {
         if (isMuted) return;
@@ -101,6 +142,14 @@ public class SoundManager implements GameObserver {
         }
     }
 
+    /**
+     * Plays a landing sound when a brick hits the stack.
+     * <p>
+     * <b>Debouncing Logic:</b> Uses {@code lastDropTime} to enforce a cooldown defined by
+     * {@link GameConfiguration#DROP_SOUND_COOLDOWN_MS}. This prevents audio distortion
+     * when bricks land in rapid succession (e.g., during hard drops or high speeds).
+     * </p>
+     */
     @Override
     public void onBrickDropped() {
         long currentTime = System.currentTimeMillis();
@@ -113,6 +162,7 @@ public class SoundManager implements GameObserver {
         }
     }
 
+    /** Stops music and plays the Game Over sound effect. */
     @Override
     public void onGameOver() {
         stopMusic();
@@ -121,6 +171,11 @@ public class SoundManager implements GameObserver {
         }
     }
 
+    /**
+     * Adjusts the background music speed to reflect the game's tension.
+     *
+     * @param isDanger true to increase playback rate; false to reset to normal speed.
+     */
     public void setDangerMode(boolean isDanger) {
         if (backgroundMusic == null) return;
 
@@ -143,7 +198,7 @@ public class SoundManager implements GameObserver {
         setDangerMode(isDanger);
     }
 
-    // Unused Observer methods
+    // Unused Observer methods required by interface contract
     @Override public void onBoardUpdated(ViewData viewData) {}
     @Override public void onGameBackgroundUpdated(int[][] boardMatrix) {}
     @Override public void onScoreUpdated(int score) {}

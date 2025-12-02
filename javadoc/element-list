@@ -1,0 +1,10 @@
+com.comp2042
+com.comp2042.controllers
+com.comp2042.logic
+com.comp2042.logic.board
+com.comp2042.logic.bricks
+com.comp2042.logic.mode
+com.comp2042.managers
+com.comp2042.model
+com.comp2042.ui
+com.comp2042.util

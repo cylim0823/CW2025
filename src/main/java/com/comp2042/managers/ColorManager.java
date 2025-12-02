@@ -4,6 +4,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import java.util.Map;
 
+/**
+ * Manages the color palette for the game elements.
+ * <p>
+ * This class centralizes visual styling, decoupling the {@link com.comp2042.ui.GameRenderer}
+ * from hardcoded color values. It maps the logical ID of a brick (e.g., 1 for I-Brick)
+ * to its corresponding JavaFX {@link Paint} object.
+ * </p>
+ */
 public class ColorManager {
 
     private static final Map<Integer, Paint> BRICK_COLORS = Map.of(
@@ -18,22 +26,26 @@ public class ColorManager {
     );
 
     /**
-     * Returns the paint color for a specific brick ID.
+     * Retrieves the specific color associated with a brick ID.
+     *
+     * @param brickId the integer identifier of the brick type.
+     * @return the corresponding {@link Paint} object, or {@link Color#WHITE} if the ID is unknown.
      */
     public Paint getPaint(int brickId) {
         return BRICK_COLORS.getOrDefault(brickId, Color.WHITE);
     }
 
     /**
-     * Returns the color for the Ghost piece.
+     * Returns a color for the "Ghost Piece" projection.
+     * <p>
+     * Note: Currently unused as the GameRenderer uses a static grey overlay,
+     * but preserved for potential future features where ghosts match the brick color.
+     * </p>
+     *
+     * @param brickId the integer identifier of the brick type.
+     * @return a semi-transparent version of the brick's color.
      */
     public Paint getGhostPaint(int brickId) {
-        Paint paint = getPaint(brickId);
-        if (paint instanceof Color) {
-            Color c = (Color) paint;
-            // Return same color but with 50% opacity (0.5 alpha)
-            return new Color(c.getRed(), c.getGreen(), c.getBlue(), 0.5);
-        }
-        return paint;
+        return Color.rgb(100, 100, 100, 0.4);
     }
 }

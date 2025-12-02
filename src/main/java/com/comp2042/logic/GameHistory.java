@@ -5,9 +5,16 @@ import com.comp2042.model.BoardMemento;
 import java.util.Stack;
 
 /**
- * This class handles the logic for saving and restoring game states.
- * It uses a Stack to keep track of the board history and makes sure
- * the player doesn't exceed the undo limit.
+ * Manages the history of game states to support the "Undo" feature.
+ * <p>
+ * <b>Design Pattern: Memento (Caretaker)</b><br>
+ * This class acts as the Caretaker. It stores and retrieves {@link BoardMemento} objects,
+ * which contain the snapshot of the board, score, and level.
+ * </p>
+ * <p>
+ * It enforces the undo limits defined by the active {@link com.comp2042.logic.mode.GameMode},
+ * ensuring that players in Normal Mode cannot exceed the allowed number of reverts.
+ * </p>
  */
 public class GameHistory {
 
@@ -15,9 +22,13 @@ public class GameHistory {
     private int undoCount = 0;
 
     /**
-     * Saves the current state of the game.
-     * undo the most recent locked brick, not rewind the whole game.
-     * @param memento The state to be saved.
+     * Captures and stores a snapshot of the current game state.
+     * <p>
+     * This is typically called immediately before a piece locks into place,
+     * creating a save point that the player can revert to.
+     * </p>
+     *
+     * @param memento the state object containing the board matrix and score.
      */
     public void save(BoardMemento memento) {
         history.clear();
@@ -25,10 +36,15 @@ public class GameHistory {
     }
 
     /**
-     * Tries to get the previous game state.
-     * It checks if the player has enough "undo lives" left before returning the state.
-     * @param maxAllowed The undo limit defined by the current Game Mode.
-     * @return The previous state if valid, or null if the stack is empty or limit reached.
+     * Attempts to revert the game to the previous state.
+     * <p>
+     * This method validates the request against the current game mode's rules.
+     * If the player has used up their allowance (e.g., 3 times in Normal Mode),
+     * the request is denied.
+     * </p>
+     *
+     * @param maxAllowed the maximum number of undos permitted by the current strategy.
+     * @return the previous {@link BoardMemento} if successful; {@code null} if the limit is reached or history is empty.
      */
     public BoardMemento popState(int maxAllowed) {
         if (undoCount >= maxAllowed) {
@@ -45,8 +61,11 @@ public class GameHistory {
     }
 
     /**
-     * Resets the counter and clears history.
-     * Called when the player starts a new game.
+     * Clears the undo history and resets the usage counter.
+     * <p>
+     * Called when a new game starts or when the board is wiped (e.g., in Zen Mode restart),
+     * as previous states are no longer valid for the new board.
+     * </p>
      */
     public void reset() {
         undoCount = 0;
@@ -54,8 +73,9 @@ public class GameHistory {
     }
 
     /**
-     * Returns how many times undo has been used.
-     * @return current undo count.
+     * Retrieves the number of times the player has successfully used the undo feature.
+     *
+     * @return the current usage count.
      */
     public int getUndoCount() {
         return undoCount;

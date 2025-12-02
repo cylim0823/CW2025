@@ -28,6 +28,24 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * The main GUI controller for the Tetris game.
+ *
+ * <p>This class acts as the View + Controller in the MVC architecture, handling:
+ * <ul>
+ *   <li>Rendering the game board, next bricks, and hold panel through {@link GameRenderer}</li>
+ *   <li>Receiving user input via {@link KeyManager}</li>
+ *   <li>Forwarding input events to the {@link GameController} (the Model)</li>
+ *   <li>Updating UI when notified through {@link GameObserver}</li>
+ *   <li>Managing UI panels such as pause and game-over screens</li>
+ * </ul>
+ *
+ * <p>Game updates are driven by {@link GameLoopManager}, which generates timed tick events
+ * that simulate the falling bricks. The GUI controller listens to these ticks and sends
+ * DOWN events to the model.
+ * @author Chen Yu
+ * @version 1.0
+ */
 public class GuiController implements Initializable, GameObserver {
 
     private static final String FONT_PATH = GameConfiguration.FONT_PATH;
@@ -57,6 +75,20 @@ public class GuiController implements Initializable, GameObserver {
     private InputEventListener eventListener;
     private int currentScore = 0;
 
+    /**
+     * Initializes all UI components, event managers, and the game renderer.
+     *
+     * <p>This method wires together:
+     * <ul>
+     *   <li>GameLoopManager – handles the main ticking loop</li>
+     *   <li>KeyManager – handles keyboard input</li>
+     *   <li>GameRenderer – draws the board and UI elements</li>
+     *   <li>SoundManager – plays background music and SFX</li>
+     *   <li>GameController – the Model that contains game logic</li>
+     * </ul>
+     *
+     * <p>Observers are registered here so that the GUI receives model updates.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadCustomFont();
@@ -84,6 +116,12 @@ public class GuiController implements Initializable, GameObserver {
         resetUIState();
     }
 
+    /**
+     * Applies a selected game mode to the model and adjusts UI visibility
+     * (such as enabling or disabling the level counter).
+     *
+     * @param mode the game mode selected by the user
+     */
     public void initGameMode(GameMode mode) {
         if (gameController != null) {
             gameController.setGameMode(mode);
@@ -95,28 +133,56 @@ public class GuiController implements Initializable, GameObserver {
 
     // Observer methods
 
+    /**
+     * Called when the board state changes. Updates the brick positions
+     * and active piece on the screen.
+     *
+     * @param viewData snapshot of the board and active piece for rendering
+     */
     @Override
     public void onBoardUpdated(ViewData viewData) {
         gameRenderer.refreshBrick(viewData);
     }
 
+    /**
+     * Updates static tile background (ghost blocks, locked bricks, etc).
+     *
+     * @param boardMatrix the full board matrix of locked tiles
+     */
     @Override
     public void onGameBackgroundUpdated(int[][] boardMatrix) {
         gameRenderer.refreshGameBackground(boardMatrix);
     }
 
+    /**
+     * Refreshes the score label when the player gains points.
+     *
+     * @param score the new total score
+     */
     @Override
     public void onScoreUpdated(int score) {
         this.currentScore = score;
         Platform.runLater(() -> scoreLabel.setText("Score: " + score));
     }
 
+    /**
+     * Updates the level display and increases the game speed.
+     *
+     * @param level the current game level
+     */
     @Override
     public void onLevelUpdated(int level) {
         Platform.runLater(() -> levelLabel.setText("Level: " + level));
         gameLoopManager.updateLevel(level);
     }
 
+    /**
+     * Shows a temporary UI notification (e.g., "Double!", "Tetris!")
+     * when the model signals a line clear.
+     *
+     * @param lines number of lines cleared
+     * @param message the display text for the combo
+     */
     @Override
     public void onLineCleared(int lines, String message) {
         Platform.runLater(() -> showLineClearNotification(message));
@@ -125,6 +191,10 @@ public class GuiController implements Initializable, GameObserver {
     @Override
     public void onBrickDropped() {}
 
+    /**
+     * Displays the game-over screen, plays the game-over sound, and
+     * loads high score information from the {@link ScoreManager}.
+     */
     @Override
     public void onGameOver() {
         Platform.runLater(() -> {
@@ -146,6 +216,11 @@ public class GuiController implements Initializable, GameObserver {
         });
     }
 
+    /**
+     * Shows or hides a danger visual effect when the stack is close to the top.
+     *
+     * @param isDanger true if the board is near overflow
+     */
     @Override
     public void onDangerStateChanged(boolean isDanger) {
         // Visual updates must happen on the JavaFX thread
@@ -157,6 +232,10 @@ public class GuiController implements Initializable, GameObserver {
     }
 
     // Helper methods
+    /**
+     * Called by the {@link GameLoopManager} at fixed intervals.
+     * Pushes a DOWN input event into the model to simulate gravity.
+     */
     private void onGameTick() {
         if (eventListener != null) {
             eventListener.onDownEvent(new MoveEvent(EventType.DOWN, EventSource.THREAD));
@@ -168,6 +247,10 @@ public class GuiController implements Initializable, GameObserver {
         eventListener.onDownEvent(event);
     }
 
+    /**
+     * Resets UI panels, restarts the model state, restarts the game loop,
+     * and begins background music.
+     */
     public void startNewGame() {
         eventListener.createNewGame();
         resetUIState();
@@ -179,6 +262,9 @@ public class GuiController implements Initializable, GameObserver {
         }
     }
 
+    /**
+     * Toggles the pause state and shows/hides the pause panel.
+     */
     public void togglePause() {
         gameLoopManager.togglePause();
         boolean isPaused = gameLoopManager.isPauseProperty().get();
@@ -187,12 +273,21 @@ public class GuiController implements Initializable, GameObserver {
         rootPane.requestFocus();
     }
 
+    /**
+     * Toggles background music and SFX mute state.
+     */
     public void toggleMute(){
         if (soundManager != null){
             soundManager.toggleMute();
         }
     }
 
+    /**
+     * Sets the listener that should receive keyboard events.
+     * This is usually the {@link GameController} (the Model).
+     *
+     * @param eventListener the input listener to receive key actions
+     */
     public void setEventListener(InputEventListener eventListener) {
         this.eventListener = eventListener;
         if (this.keyManager != null) {
@@ -200,17 +295,31 @@ public class GuiController implements Initializable, GameObserver {
         }
     }
 
+    /**
+     * Creates and displays a floating score notification effect
+     * (e.g., "TETRIS!") on the root pane.
+     *
+     * @param message the text to display
+     */
     public void showLineClearNotification(String message) {
         NotificationPanel notifPanel = new NotificationPanel(message);
         rootPane.getChildren().add(notifPanel);
         notifPanel.showScore(rootPane.getChildren());
     }
 
+    /**
+     * Hides pause and game-over UI panels.
+     * Called when starting a new game.
+     */
     private void resetUIState() {
         gameOverPane.setVisible(false);
         pausePane.setVisible(false);
     }
 
+    /**
+     * Loads a custom font file specified in the game configuration.
+     * Falls back to default fonts if loading fails.
+     */
     private void loadCustomFont() {
         try {
             Font.loadFont(getClass().getResourceAsStream(FONT_PATH), FONT_SIZE);
@@ -221,16 +330,21 @@ public class GuiController implements Initializable, GameObserver {
 
     // Button handlers
 
+    /** Starts a new game when the New Game button is pressed. */
     @FXML
     public void handleNewGameButton() {
         startNewGame();
     }
 
+    /** Toggles the pause menu from the UI button. */
     @FXML
     public void handlePauseButton() {
         togglePause();
     }
 
+    /**
+     * Ends the current game, stops audio, and loads the main menu scene.
+     */
     @FXML
     public void handleMainMenuButton() {
         gameLoopManager.gameOver();
@@ -240,6 +354,11 @@ public class GuiController implements Initializable, GameObserver {
         loadScene("fxml/mainMenu.fxml");
     }
 
+    /**
+     * Loads another FXML scene and replaces the current root node.
+     *
+     * @param fxmlFile path to the FXML file inside resources
+     */
     private void loadScene(String fxmlFile) {
         try {
             URL url = getClass().getClassLoader().getResource(fxmlFile);

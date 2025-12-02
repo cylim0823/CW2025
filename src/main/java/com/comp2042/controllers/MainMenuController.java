@@ -20,6 +20,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the main menu screen.
+ * <p>
+ * Loads the highest score, handles button presses, and switches
+ * to the game scene with the selected {@link GameMode}.
+ * </p>
+ */
 public class MainMenuController implements Initializable {
 
     private static final String FONT_PATH = GameConfiguration.FONT_PATH;
@@ -27,6 +34,13 @@ public class MainMenuController implements Initializable {
 
     @FXML private Label highScoreLabel;
 
+    /**
+     * Initializes the main menu.
+     * <p>
+     * - Loads custom font<br>
+     * - Retrieves and displays the highest saved score
+     * </p>
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadCustomFont();
@@ -37,6 +51,10 @@ public class MainMenuController implements Initializable {
         }
     }
 
+    /**
+     * Loads a custom font for UI labels.
+     * Logs an error if the font cannot be loaded.
+     */
     private void loadCustomFont() {
         try {
             Font.loadFont(getClass().getResourceAsStream(FONT_PATH), FONT_SIZE);
@@ -45,26 +63,58 @@ public class MainMenuController implements Initializable {
         }
     }
 
-    // Button handlers
+    // Button Handlers
 
+    /**
+     * Starts the game in Normal Mode when the "Start" button is clicked.
+     *
+     * @param event the button click action event
+     * @throws IOException if the game layout FXML cannot be loaded
+     */
     @FXML
     private void handleStartButton(ActionEvent event) throws IOException {
         loadGameScene(event, new NormalMode());
     }
 
+    /**
+     * Starts the game in Zen Mode when the "Zen Mode" button is clicked.
+     *
+     * @param event the button click action event
+     * @throws IOException if the game layout FXML cannot be loaded
+     */
     @FXML
     private void handleZenModeButton(ActionEvent event) throws IOException {
         loadGameScene(event, new ZenMode());
     }
 
+    /**
+     * Exits the application when the "Exit" button is clicked.
+     *
+     * @param event the button click action event
+     */
     @FXML
     private void handleExitButton(ActionEvent event) {
         Platform.exit();
     }
 
     /**
-     * Helper method to load the game scene.
-     * REFACTORED: Accepts GameMode interface
+     * Loads the game layout scene and initializes it with
+     * the selected {@link GameMode}.
+     *
+     * <p>
+     * Steps performed:
+     * <ol>
+     *     <li>Load the gameLayout.fxml file</li>
+     *     <li>Get the {@link GuiController}</li>
+     *     <li>Pass the chosen GameMode strategy</li>
+     *     <li>Start a new game</li>
+     *     <li>Replace the current scene root</li>
+     * </ol>
+     * </p>
+     *
+     * @param event the button click event used to access the current scene
+     * @param mode the gameplay mode (Normal, Zen, etc.)
+     * @throws IOException if FXML cannot be found or loaded
      */
     private void loadGameScene(ActionEvent event, GameMode mode) throws IOException {
         URL location = getClass().getClassLoader().getResource("fxml/gameLayout.fxml");
@@ -77,13 +127,13 @@ public class MainMenuController implements Initializable {
 
         GuiController c = fxmlLoader.getController();
 
-        // Pass the Strategy Object
+        // Apply selected mode (Strategy pattern)
         c.initGameMode(mode);
         c.startNewGame();
 
         Scene currentScene = ((Node) event.getSource()).getScene();
         currentScene.setRoot(root);
 
-        javafx.application.Platform.runLater(root::requestFocus);
+        Platform.runLater(root::requestFocus);
     }
 }
